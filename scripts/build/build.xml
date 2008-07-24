@@ -6,7 +6,7 @@
 
 	<property
 		name="koowa_scm"
-		value="https://joomlatools.unfuddle.com/svn/joomlatools_koowa/code"
+		value="https://joomlatools.unfuddle.com/svn/joomlatools_koowa/releases/0.5/code"
 		override="true" />
 
 	<property
@@ -23,7 +23,7 @@
 	<target name="main" description="Build Installable Packages">
 
 		<mkdir dir="${targetdir}" />
-		<delete file="${targetdir}/koowa.tar.gz/" />
+		<delete file="${targetdir}/koowa_v0.5.tar.gz/" />
 
 		<phingcall target="clean" />
 
@@ -87,20 +87,11 @@
 			</then>
 		</if>
 
-		<!-- Look for a branch, otherwise use the trunk -->
-		<if>
-			<isset property="branch" />
-			<then>
-				<property name="_folder" value="branches/${branch}" />
-			</then>
-			<else>
-				<property name="_folder" value="trunk" />
-			</else>
-		</if>
+
 		<svnexport
 			username="${scmusr}"
 			password="${scmpwd}"
-			repositoryurl="${scm}/${_folder}/${extpath}"
+			repositoryurl="${scm}/${extpath}"
 			todir="${targetdir}/${extpath}"
 			nocache="true"
 			force="true" />
