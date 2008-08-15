@@ -106,6 +106,9 @@ class KDatabaseAbstract extends KPatternProxy
 					$this->select($sql);
 					break;
 				}
+				
+				//Make sure the where statement is uppercase
+				$sql = str_replace('where', 'WHERE', $sql);
 
 				$where = substr($sql, strpos($sql, 'WHERE'));
 				$table = str_replace($this->_object->getPrefix(), '', $query['table_names'][0]);
@@ -128,6 +131,9 @@ class KDatabaseAbstract extends KPatternProxy
 					$this->select($sql);
 					break;
 				}
+				
+				//Make sure the where statement is uppercase
+				$sql = str_replace('where', 'WHERE', $sql);
 
 				$where = substr($sql, strpos($sql, 'WHERE'));
 				$table = str_replace($this->_object->getPrefix(), '', $query['table_names'][0]);
