@@ -79,7 +79,7 @@ class KDatabaseAbstract extends KPatternProxy
 					break;
 				}
 
-				$table = $query['table_names'][0];
+				$table = str_replace($this->_object->getPrefix(), '', $query['table_names'][0]);
 
                 if(!isset($query['column_names'] ))
                 {
@@ -108,7 +108,7 @@ class KDatabaseAbstract extends KPatternProxy
 				}
 
 				$where = substr($sql, strpos($sql, 'WHERE'));
-				$table = $query['table_names'][0];
+				$table = str_replace($this->_object->getPrefix(), '', $query['table_names'][0]);
 
 				$data  = array();
 				foreach($query['column_names'] as $key => $column_name) {
@@ -130,7 +130,7 @@ class KDatabaseAbstract extends KPatternProxy
 				}
 
 				$where = substr($sql, strpos($sql, 'WHERE'));
-				$table = $query['table_names'][0];
+				$table = str_replace($this->_object->getPrefix(), '', $query['table_names'][0]);
 
 				$result = $this->delete($table, $where);
 			} break;
@@ -297,7 +297,7 @@ class KDatabaseAbstract extends KPatternProxy
 			  .' SET '.implode(', ', $vals)
 			  .' '.$where
 		;
-		
+			
 		//Create the arguments object
 		$args = new stdClass();
 		$args->table  = $table;
@@ -368,7 +368,7 @@ class KDatabaseAbstract extends KPatternProxy
 		//If autoexec is on, execute the query and return the affected rows
 		if($this->_autoexec)
 		{
-			if (!$this->query())
+			if (!($result = $this->query()))
             {
 				$this->setError($this->_object->getErrorMsg());
 				return false;
@@ -379,6 +379,8 @@ class KDatabaseAbstract extends KPatternProxy
 				$result = 1;
 			}
 		}
+		
+		
 
 		return $result;
 	}
@@ -412,24 +414,48 @@ class KDatabaseAbstract extends KPatternProxy
 	{
 		settype($tables, 'array'); //force to array
 		$result = array();
-
+		
 		foreach ($tables as $tblval)
 		{  
 			$table = $tblval;	
 		
 			//Check the table if it already has a table prefix applied.
-			if(substr($tblval, 0, 3) != '#__') {
-				$table = '#__'.$tblval;
+			if(strpos($tblval, $this->getObject()->getPrefix()) === false) 
+			{
+				if(substr($tblval, 0, 3) != '#__') {
+					$table = '#__'.$tblval;
+				}
 			}
-		
+			
 			$this->select( 'SHOW FIELDS FROM ' . $this->nameQuote($table));
 			$fields = $this->loadObjectList();
-
+			
 			foreach ($fields as $field) {
 				$result[$tblval][$field->Field] = $field;
 			}
 		}
 		return $result;
+	}
+	
+	/**
+	 * Get the result of the SHOW TABLE STATUS statement
+	 * 
+	 * @param	string	LIKE clause, can cotnains a tablename with % wildcards
+	 * @param 	string	WHERE clause (MySQL5+ only)
+	 * @return	array	List of objects with table info
+	 */
+	public function getTableStatus($like = null, $where = null)
+	{
+		if(!empty($like)) {
+			$like = ' LIKE '.$this->quote($like);
+		}
+		
+		if(!empty($where)) {
+			$where = ' WHERE '.$where;
+		}
+		
+		$this->setQuery( 'SHOW TABLE STATUS'.$like.$where );
+		return $this->loadObjectList('Name');
 	}
 
 	/**
@@ -527,26 +553,4 @@ class KDatabaseAbstract extends KPatternProxy
     {
     	return $this->getObject()->getErrorMsg();
     }
-    
-
-	/**
-	 * Get the result of the SHOW TABLE STATUS statement
-	 * 
-	 * @param	string	LIKE clause, can cotnains a tablename with % wildcards
-	 * @param 	string	WHERE clause (MySQL5+ only)
-	 * @return	array	List of objects with table info
-	 */
-	public function getTableStatus($like = null, $where = null)
-	{
-		if(!empty($like)) {
-			$like = ' LIKE '.$this->quote($like);
-		}
-		
-		if(!empty($where)) {
-			$where = ' WHERE '.$where;
-		}
-		
-		$this->setQuery( 'SHOW TABLE STATUS'.$like.$where );
-		return $this->loadObjectList('Name');
-	}
 }
