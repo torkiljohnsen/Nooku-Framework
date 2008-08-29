@@ -220,6 +220,33 @@ class KDatabaseAbstract extends KPatternProxy
 
 		return $this->update( $this->replaceTablePrefix($table, '', '#__'), $data, $where);
 	}
+	
+	/**
+	 * Proxy the database connector loadObject() method
+	 */
+	public function loadObject( &$object = null )
+	{
+		if ($object != null)
+		{
+			if (!($cur = $this->query())) {
+				return false;
+			}
+
+			if ($array = mysql_fetch_assoc( $cur ))
+			{
+				mysql_free_result( $cur );
+				$object = JArrayHelper::toObject($array);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		else
+		{
+			$object = $this->_object->loadObject($object);
+			return $object;
+		}
+	}
 
 	/**
 	 * Get a database query object
