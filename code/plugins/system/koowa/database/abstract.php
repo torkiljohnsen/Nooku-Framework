@@ -37,11 +37,19 @@ class KDatabaseAbstract extends KPatternProxy
 	protected $_autoexec = true;
 	
 	/**
+	 * Table metadata information
+	 *
+	 * @var 	array
+	 */
+	protected $_tables;
+	
+	/**
 	 * The commandchain
 	 *
 	 * @var	object
 	 */
 	protected $_commandChain = null;
+	
 
 	/**
 	 * Constructor
@@ -423,23 +431,34 @@ class KDatabaseAbstract extends KPatternProxy
 		
 		foreach ($tables as $tblval)
 		{  
-			$table = $tblval;	
-		
-			//Check the table if it already has a table prefix applied.
-			if(strpos($tblval, $this->getObject()->getPrefix()) === false) 
+			$table = $tblval;
+
+			if(!isset($this->_tables[$tblval])) 
 			{
-				if(substr($tblval, 0, 3) != '#__') {
-					$table = '#__'.$tblval;
+				//Check the table if it already has a table prefix applied.
+				if(strpos($tblval, $this->getObject()->getPrefix()) === false) 
+				{
+					if(substr($tblval, 0, 3) != '#__') {
+						$table = '#__'.$tblval;
+					}
+				} 
+				else 
+				{
+					$tblval = $this->replaceTablePrefix($tblval, '');
+				}
+			
+				$this->select( 'SHOW FIELDS FROM ' . $this->nameQuote($table));
+				$fields = $this->loadObjectList();
+			
+				foreach ($fields as $field) {
+					$this->_tables[$tblval][$field->Field] = $field;
 				}
 			}
 			
-			$this->select( 'SHOW FIELDS FROM ' . $this->nameQuote($table));
-			$fields = $this->loadObjectList();
-			
-			foreach ($fields as $field) {
-				$result[$tblval][$field->Field] = $field;
-			}
+			//Add the requested table to the result
+			$result[$tblval] = $this->_tables[$tblval];
 		}
+		
 		return $result;
 	}
 	
