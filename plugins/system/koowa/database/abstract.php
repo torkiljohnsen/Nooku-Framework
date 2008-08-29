@@ -223,6 +223,9 @@ class KDatabaseAbstract extends KPatternProxy
 	
 	/**
 	 * Proxy the database connector loadObject() method
+	 * 
+	 * This functions also adds support for the legacy API. In case the object is passed
+	 * in by reference instead of returned. 
 	 */
 	public function loadObject( &$object = null )
 	{
