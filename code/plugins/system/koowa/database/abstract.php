@@ -37,11 +37,11 @@ class KDatabaseAbstract extends KPatternProxy
 	protected $_autoexec = true;
 	
 	/**
-	 * Table metadata information
+	 * Cached table metadata information
 	 *
 	 * @var 	array
 	 */
-	protected $_tables;
+	protected $_tables_cache;
 	
 	/**
 	 * The commandchain
@@ -463,7 +463,7 @@ class KDatabaseAbstract extends KPatternProxy
 		{  
 			$table = $tblval;
 
-			if(!isset($this->_tables[$tblval])) 
+			if(!isset($this->_tables_cache[$tblval])) 
 			{
 				//Check the table if it already has a table prefix applied.
 				if(strpos($tblval, $this->getObject()->getPrefix()) === false) 
@@ -481,12 +481,12 @@ class KDatabaseAbstract extends KPatternProxy
 				$fields = $this->loadObjectList();
 			
 				foreach ($fields as $field) {
-					$this->_tables[$tblval][$field->Field] = $field;
+					$this->_tables_cache[$tblval][$field->Field] = $field;
 				}
 			}
 			
 			//Add the requested table to the result
-			$result[$tblval] = $this->_tables[$tblval];
+			$result[$tblval] = $this->_tables_cache[$tblval];
 		}
 		
 		return $result;
