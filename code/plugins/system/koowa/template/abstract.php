@@ -213,4 +213,20 @@ abstract class KTemplateAbstract
                 return false;
         }
     }
+    
+    /**
+     * Dummy url_stat implementation, prevents "url_stat is not implemented" 
+     * messages on some systems 
+     * 
+     * @see	http://be.php.net/manual/en/function.stream-wrapper-register.php
+     *
+     * @param 	string	Path
+     * @param	int		Flags
+     * @return 	array
+     */
+    public function url_stat($path, $flags = 0)
+    {
+        return array();
+    }
+    
 }
