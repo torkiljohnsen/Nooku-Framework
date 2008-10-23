@@ -100,13 +100,13 @@ abstract class KTemplateAbstract
         if (! ini_get('short_open_tag')) 
 		{
 			// convert "<?=" to "<?php echo"
-	        $find = '/\<\?\=\s?(.*?)\?>/';
-	        $replace = "<?php echo \$1 ?>";
+	        $find = '/\<\?\=\s?(.*?)/';
+	        $replace = "<?php echo \$1";
 	        $this->_data = preg_replace($find, $replace, $this->_data);
 	        
 	        // convert "<?" to "<?php"
-	        $find = '/\<\?\s(.*?)\?>/';
-	        $replace = "<?php \$1 ?>";
+	        $find = '/\<\?\s(.*?)/';
+	        $replace = "<?php \$1";
 	        $this->_data = preg_replace($find, $replace, $this->_data);
         }
 		
