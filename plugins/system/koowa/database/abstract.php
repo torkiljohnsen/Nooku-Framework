@@ -608,4 +608,18 @@ class KDatabaseAbstract extends KPatternProxy
     {
     	return $this->getObject()->getErrorMsg();
     }
+    
+    /**
+	 * Get a quoted database escaped string
+	 * 
+	 * NULL will not be quoted
+	 *
+	 * @param	string	A string
+	 * @param	boolean	Default true to escape string, false to leave the string unchanged
+	 * @return	string
+	 */
+	public function quote( $text, $escaped = true )
+	{
+		return strtoupper(trim($text)) == 'NULL' ? $text : $this->_object->Quote($text, $escaped);
+	}
 }
