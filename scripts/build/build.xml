@@ -7,7 +7,7 @@
 	<property name="koowa_scm" override="true"
 		value="https://joomlatools.unfuddle.com/svn/joomlatools_koowa/releases/0.6/code" />
 	<property name="targetdir" value="packages" override="true" />
-	<property name="targetfile" override="true" value="koowa_v0.6.0.tar.gz" />
+	<property name="targetfile" override="true" value="koowa_v0.6.1.tar.gz" />
 	
 	<!-- MAIN -->
 	<target name="main" description="Build Installable Packages">
