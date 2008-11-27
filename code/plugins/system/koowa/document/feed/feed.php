@@ -204,7 +204,7 @@ class KDocumentFeed extends KDocumentAbstract
 		$file = $cache_path.DS.$file.'_'.$option.'.xml';
 
 		// Instantiate feed renderer and set the mime encoding
-		$renderer = $this->getRenderer($type);
+		$renderer = $this->loadRenderer($type);
 		
 		//output
 		// Generate prolog

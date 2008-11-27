@@ -176,7 +176,7 @@ class KDocumentHtml extends KDocumentAbstract
 			return null;
 		}
 
-		if( $renderer = $this->getRenderer($type)) {
+		if( $renderer = $this->loadRenderer($type)) {
 			$result = $renderer->render($name, $attribs, $result);
 		}
 
