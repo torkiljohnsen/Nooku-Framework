@@ -595,7 +595,7 @@ abstract class KDocumentAbstract extends KObject
 	 * @param	string	$type 	The renderer type
 	 * @return	object
 	 */
-	public function getRenderer( $type )
+	public function loadRenderer( $type )
 	{
 		$instance = KFactory::tmp('lib.koowa.document.'.$this->getType().'.renderer.'.$type, array('document' => $this));
 		return $instance;
