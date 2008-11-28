@@ -38,9 +38,15 @@ String.extend({
 		if(key == "") return;
 	
 		var uri   = this.parseUri();
-		var query = uri['query'].parseQueryString();
-		if($defined(query[key])) return query[key]
-			else return defaultValue;
+		if($defined(uri['query'])) 
+		{
+			var query = uri['query'].parseQueryString();
+			if($defined(query[key])) {
+				return query[key]
+			}
+		}
+		
+		return defaultValue;
 	},
 	
 	parseQueryString: function() 
