@@ -28,13 +28,6 @@ class KDatabaseAbstract extends KPatternProxy
 	 * @var int
 	 */
 	protected $_limit = 0;
-
-	/**
-	 * Automatically execute the query
-	 *
-	 * @var boolean
-	 */
-	protected $_autoexec = true;
 	
 	/**
 	 * Cached table metadata information
@@ -68,15 +61,11 @@ class KDatabaseAbstract extends KPatternProxy
 
 	/**
 	 * Proxy the database connector setQuery() method
-	 *
-	 * @return	mixed	Database connector return value
 	 */
 	public function setQuery($sql, $offset = 0, $limit = 0, $prefix = '#__')
 	{
-		$result = false;
-
 		$query  = explode(' ', trim($sql));
-
+	
 		switch( strtoupper($query[0]))
 		{
 			case 'INSERT' :
@@ -87,12 +76,12 @@ class KDatabaseAbstract extends KPatternProxy
 					break;
 				}
 
+				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
                 if(!isset($query['column_names'] ))
                 {
                     // the column names weren't specified, get them from the table's metadata
-                    // TODO is there a more performant way?
                     $fields = $this->getTableFields($table);
                     $query['column_names'] = array_keys($fields[$table]);
                 }
@@ -102,62 +91,60 @@ class KDatabaseAbstract extends KPatternProxy
                 foreach($query['column_names'] as $key => $column_name) {
                     $data[$column_name] = $query['values'][$key]['value'];
                 }
-				$this->_autoexec = false;
-				$result = $this->insert($table, $data);
-				$this->_autoexec = true;				
+		
+				$this->insert($table, $data);			
 			} break;
 
 			case 'UPDATE' :
 			{
+				//Make sure the where statement is uppercase
+				$sql   = str_replace('where', 'WHERE', $sql);
+				
+				//Split the sql string
+				$where = substr($sql, strpos($sql, 'WHERE'));
+				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
+				
 				$parser = new KDatabaseQueryParser();
-				if(!$query  = $parser->parse($this->replaceTablePrefix($sql, '', $prefix))) {
+				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
 				
-				//Make sure the where statement is uppercase
-				$sql = str_replace('where', 'WHERE', $sql);
-
-				$where = substr($sql, strpos($sql, 'WHERE'));
+				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
 				$data  = array();
 				foreach($query['column_names'] as $key => $column_name) {
 					$data[$column_name] = $query['values'][$key]['value'];
 				}
-
+				
 				//force to true in case we where not able to determine the rows affected
-				$this->_autoexec = false;
-				$result = $this->update($table, $data, $where);
-				$this->_autoexec = true;
+				$this->update($table, $data, $where);
 			} break;
 
 			case 'DELETE'  :
 			{
+				//Make sure the where statement is uppercase
+				$sql = str_replace('where', 'WHERE', $sql);
+				
+				//Split the sql string
+				$where = substr($sql, strpos($sql, 'WHERE'));
+				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
+				
 				$parser = new KDatabaseQueryParser();
-				if(!$query  = $parser->parse($this->replaceTablePrefix($sql, '', $prefix))) {
+				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
 				
-				//Make sure the where statement is uppercase
-				$sql = str_replace('where', 'WHERE', $sql);
-
-				$where = substr($sql, strpos($sql, 'WHERE'));
+				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
-				$result = $this->delete($table, $where);
+				$this->delete($table, $where);
 			} break;
 
-			default :
-			{
-				$this->_autoexec = false; //turn off autoexecuting of queries
-				$result = $this->select( $sql, $offset, $limit );
-				$this->_autoexec = true; //turn on autoexecuting of queries
-			}
+			default : $this->select( $sql, $offset, $limit );
 		}
-
-		return $result;
 	}
 
 	/**
@@ -177,13 +164,13 @@ class KDatabaseAbstract extends KPatternProxy
 			$data[$k] = $v;
 		}
 
-		if($result = $this->insert( $this->replaceTablePrefix($table, '', '#__'), $data ))
-		{
+		if($this->insert( $this->replaceTablePrefix($table, '', '#__'), $data ) !== false) 
+		{	
 			$id = $this->insertid();
 			if ($keyName && $id) {
 				$object->$keyName = $id;
 			}
-
+		
 			return true;
 		}
 
@@ -400,33 +387,44 @@ class KDatabaseAbstract extends KPatternProxy
 	 */
 	public function execute($sql)
 	{
-		$result = 0;
-
 		//Replace the database table prefix
-		$this->_object->_sql = $this->replacePrefix( $sql );
+		$this->_object->setQuery($this->replacePrefix( $sql ));
 
 		// Force to zero just in case
-		$this->_object->_limit = 0;
+		$this->_object->_limit  = 0;
         $this->_object->_offset = 0;
 
-		//If autoexec is on, execute the query and return the affected rows
-		if($this->_autoexec)
-		{
-			if (!($result = $this->query()))
-            {
-				$this->setError($this->getErrorMsg());
-				return false;
-			}
+		if ($this->query() ===  false) {
+			$this->setError($this->getErrorMsg());
+			return false;
+		}
 
-			//Force affected rows to 1 in case query was successfull and no rows where returned
-			if(!$result = $this->getAffectedRows()) {
-				$result = 1;
-			}
+		//return $this->getAffectedRows();
+		return true;
+	}
+	
+	/**
+	 * Proxy the database connector loadObject() method
+	 * 
+	 * @return mixed A database resource if successful, FALSE if not.
+	 */
+	public function query()
+	{
+		if(!empty($this->_object->_sql)) 
+		{	
+			//Execute the actual query
+			$result = $this->_object->query();
+			
+			//Empty the sql to prevent the query from being executed twice
+			$this->_object->setQuery(''); 
+			return $result;
 		}
 		
+		if($this->_object->getErrorNum() !== 0) {
+			return false;
+		}
 		
-
-		return $result;
+		return true;
 	}
 
     /**
@@ -606,7 +604,7 @@ class KDatabaseAbstract extends KPatternProxy
      */
     public function getError()
     {
-    	return $this->getObject()->getErrorMsg();
+    	return $this->_object->getErrorMsg();
     }
     
     /**
