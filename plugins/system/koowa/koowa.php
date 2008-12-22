@@ -38,7 +38,7 @@ class Koowa
     /**
      * Koowa version
      */
-    const _VERSION = '0.5.5';
+    const _VERSION = '0.5.6RC';
 
     /**
      * Path to Koowa libraries
