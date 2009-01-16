@@ -221,11 +221,11 @@ class KDatabaseAbstract extends KPatternProxy
 			if (!($cur = $this->query())) {
 				return false;
 			}
-
+			
 			if ($array = mysql_fetch_assoc( $cur ))
 			{
 				mysql_free_result( $cur );
-				$object = JArrayHelper::toObject($array);
+				mosBindArrayToObject( $array, $object, null, null, false );
 				return true;
 			} else {
 				return false;
@@ -404,7 +404,7 @@ class KDatabaseAbstract extends KPatternProxy
 	}
 	
 	/**
-	 * Proxy the database connector loadObject() method
+	 * Proxy the database connector query() method
 	 * 
 	 * @return mixed A database resource if successful, FALSE if not.
 	 */
