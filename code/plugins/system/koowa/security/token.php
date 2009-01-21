@@ -25,13 +25,6 @@
  */
 class KSecurityToken
 {
-	/**
-	 * Token
-	 *
-	 * @var	string
-	 */
-	protected static $_token;
-	
     /**
      * Generate new token and store it in the session
      * 
@@ -40,14 +33,7 @@ class KSecurityToken
      */
     static public function get($forceNew = false)
     {
-        if($forceNew || !isset(self::$_token))
-        {
-            self::$_token 	= md5(uniqid(rand(), TRUE));
-            $session 		= JFactory::getSession()->set('koowa.security.token', self::$_token);
-            $session 		= JFactory::getSession()->set('koowa.security.tokentime', time());
-        }
-
-        return self::$_token;
+    	return  JUtility::getToken($forceNew);
     }
 
     /**
@@ -63,20 +49,16 @@ class KSecurityToken
     /**
      * Check if a valid token was submitted
      *
-     * @param 	boolean	Maximum age, defaults to 600 seconds
      * @return	boolean	True on success
      */
-    static public function check($max_age = 600)
+    static public function check()
     {
-    	$session	= JFactory::getSession();
-        $token		= $session->get('koowa.security.token', null);
-		$age 		= time() - $session->get('koowa.security.tokentime');
-		
 		// Using getVar instead of getString, because if the request is not a string, 
 		// we consider it a hacking attempt
-        $req		= JRequest::getVar('_token', null, 'post');
-		
-        return (self::isMd5($req) && $req===$token && $age <= $max_age);
+        $req		= JRequest::getVar('_token', null, 'post', 'alnum');
+        $token		= self::get();
+        
+        return (self::isMd5($req) && $req===$token);
     }
     
     /**
@@ -92,6 +74,4 @@ class KSecurityToken
     	$pattern = '/^[0-9a-f]{32}$/';
     	return (is_string($var) && preg_match($pattern, $var) == 1);
     }
-
-
 }
