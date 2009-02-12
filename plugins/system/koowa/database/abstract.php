@@ -65,6 +65,9 @@ class KDatabaseAbstract extends KPatternProxy
 	public function setQuery($sql, $offset = 0, $limit = 0, $prefix = '#__')
 	{
 		$query  = explode(' ', trim($sql));
+		
+		//Convert any linebreaks to br tags, added to solve a bug with Virtuemart 1.1.2
+		$sql = str_replace('\r\n', '<br />', $sql);
 	
 		switch( strtoupper($query[0]))
 		{
