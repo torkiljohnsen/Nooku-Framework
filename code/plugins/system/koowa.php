@@ -2,7 +2,7 @@
 /**
  * @version     $Id:koowa.php 251 2008-06-14 10:06:53Z mjaz $
  * @package     Koowa
- * @copyright   Copyright (C) 2007 - 2008 Joomlatools. All rights reserved.
+ * @copyright   Copyright (C) 2007 - 2009 Joomlatools. All rights reserved.
  * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPLv2
  * @link        http://www.koowa.org
  */
