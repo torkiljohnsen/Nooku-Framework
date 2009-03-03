@@ -3,7 +3,7 @@
  * @version		$Id$
  * @category	Koowa
  * @package     Koowa_Database
- * @copyright	Copyright (C) 2007 - 2008 Joomlatools. All rights reserved.
+ * @copyright	Copyright (C) 2007 - 2009 Joomlatools. All rights reserved.
  * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
  * @link     	http://www.koowa.org
  */
@@ -32,13 +32,6 @@ class KDatabase extends KPatternProxy
 	 * @var int
 	 */
 	protected $_limit = 0;
-
-	/**
-	 * Automatically execute the query
-	 *
-	 * @var boolean
-	 */
-	protected $_autoexec = true;
 	
 	/**
 	 * Cached table metadata information
@@ -79,12 +72,14 @@ class KDatabase extends KPatternProxy
 
 	/**
 	 * Proxy the database connector setQuery() method
-	 *
-	 * @return	mixed	Database connector return value
 	 */
 	public function setQuery($sql, $offset = 0, $limit = 0, $prefix = '#__')
 	{
 		$result 	= false;
+		
+		//Convert any linebreaks to br tags, added to solve a bug with Virtuemart 1.1.2
+		$sql = str_replace('\r\n', '<br />', $sql);
+		
 		$operation 	= preg_split('/\s/', trim($sql), 2,  PREG_SPLIT_NO_EMPTY);
 
 		switch(strtoupper($operation[0]))
@@ -97,12 +92,12 @@ class KDatabase extends KPatternProxy
 					break;
 				}
 
+				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
                 if(!isset($query['column_names'] ))
                 {
                     // the column names weren't specified, get them from the table's metadata
-                    // TODO is there a more performant way?
                     $fields = $this->getTableFields($table);
                     $query['column_names'] = array_keys($fields[$table]);
                 }
@@ -112,23 +107,26 @@ class KDatabase extends KPatternProxy
                 foreach($query['column_names'] as $key => $column_name) {
                     $data[$column_name] = $query['values'][$key]['value'];
                 }
-				$this->_autoexec = false;
-				$result = $this->insert($table, $data);
-				$this->_autoexec = true;				
+				
+				$this->insert($table, $data);		
 			} break;
 
 			case 'UPDATE' :
 			{
+				//Make sure the where statement is uppercase
+				$sql   = str_replace('where', 'WHERE', $sql);
+				
+				//Split the sql string
+				$where = substr($sql, strpos($sql, 'WHERE'));
+				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
+				
 				$parser = new KDatabaseQueryParser();
-				if(!$query  = $parser->parse($this->replaceTablePrefix($sql, '', $prefix))) {
+				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
 				
-				//Make sure the where statement is uppercase
-				$sql = str_replace('where', 'WHERE', $sql);
-
-				$where = substr($sql, strpos($sql, 'WHERE'));
+				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
 				$data  = array();
@@ -136,38 +134,32 @@ class KDatabase extends KPatternProxy
 					$data[$column_name] = $query['values'][$key]['value'];
 				}
 				
-				//force to true in case we where not able to determine the rows affected
-				$this->_autoexec = false;
-				$result = $this->update($table, $data, $where);
-				$this->_autoexec = true;
+				$this->update($table, $data, $where);
 			} break;
 
 			case 'DELETE'  :
 			{
+				//Make sure the where statement is uppercase
+				$sql = str_replace('where', 'WHERE', $sql);
+				
+				//Split the sql string
+				$where = substr($sql, strpos($sql, 'WHERE'));
+				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
+				
 				$parser = new KDatabaseQueryParser();
-				if(!$query  = $parser->parse($this->replaceTablePrefix($sql, '', $prefix))) {
+				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
 				
-				//Make sure the where statement is uppercase
-				$sql = str_replace('where', 'WHERE', $sql);
-
-				$where = substr($sql, strpos($sql, 'WHERE'));
+				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
-				$result = $this->delete($table, $where);
+				$this->delete($table, $where);
 			} break;
 
-			default :
-			{
-				$this->_autoexec = false; //turn off autoexecuting of queries
-				$result = $this->select( $sql, $offset, $limit );
-				$this->_autoexec = true; //turn on autoexecuting of queries
-			}
+			default : $this->select( $sql, $offset, $limit );
 		}
-
-		return $result;
 	}
 
 	/**
@@ -187,7 +179,7 @@ class KDatabase extends KPatternProxy
 			$data[$k] = $v;
 		}
 
-		if($result = $this->insert( $this->replaceTablePrefix($table, ''), $data ))
+		if($this->insert( $this->replaceTablePrefix($table, '', '#__'), $data ) !== false) 
 		{
 			$id = $this->insertid();
 			if ($keyName && $id) {
@@ -248,7 +240,7 @@ class KDatabase extends KPatternProxy
 			if ($array = mysql_fetch_assoc( $cur ))
 			{
 				mysql_free_result( $cur );
-				$object = JArrayHelper::toObject($array);
+				mosBindArrayToObject( $array, $object, null, null, false );
 				return true;
 			} else {
 				return false;
@@ -422,34 +414,48 @@ class KDatabase extends KPatternProxy
 	 * Returns number of affected rows.
 	 *
 	 * @param  string 	$sql 		The query to run.
-	 * @throws KDatabaseException
 	 * @return integer 	The number of rows affected by $sql.
 	 */
 	public function execute($sql)
 	{
-		$result = 0;
-
 		//Replace the database table prefix
-		$this->_object->_sql = $this->replacePrefix( $sql );
+		$this->_object->setQuery($this->replacePrefix( $sql ));
 
 		// Force to zero just in case
-		$this->_object->_limit = 0;
+		$this->_object->_limit  = 0;
         $this->_object->_offset = 0;
 
-		//If autoexec is on, execute the query and return the affected rows
-		if($this->_autoexec)
-		{
-			if (!$this->query()) {
-				throw new KDatabaseException($this->getError());
-			}
-
-			//Force affected rows to 1 in case query was successfull and no rows where returned
-			if(!$result = $this->getAffectedRows()) {
-				$result = 1;
-			}
+		if ($this->query() ===  false) {
+			$this->setError($this->getErrorMsg());
+			return false;
 		}
 
-		return $result;
+		//return $this->getAffectedRows();
+		return true;
+	}
+	
+	/**
+	 * Proxy the database connector query() method
+	 * 
+	 * @return mixed A database resource if successful, FALSE if not.
+	 */
+	public function query()
+	{
+		if(!empty($this->_object->_sql)) 
+		{	
+			//Execute the actual query
+			$result = $this->_object->query();
+			
+			//Empty the sql to prevent the query from being executed twice
+			$this->_object->setQuery(''); 
+			return $result;
+		}
+		
+		if($this->_object->getErrorNum() !== 0) {
+			return false;
+		}
+		
+		return true;
 	}
 
     /**
@@ -629,7 +635,7 @@ class KDatabase extends KPatternProxy
      */
     public function getError()
     {
-    	return $this->getObject()->getErrorMsg();
+    	return $this->_object->getErrorMsg();
     }
     
     /**
