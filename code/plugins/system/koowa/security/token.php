@@ -4,7 +4,7 @@
  * @category	Koowa
  * @package		Koowa_Security
  * @subpackage	Token
- * @copyright	Copyright (C) 2007 - 2008 Joomlatools. All rights reserved.
+ * @copyright	Copyright (C) 2007 - 2009 Joomlatools. All rights reserved.
  * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
  */
 
@@ -43,22 +43,7 @@ class KSecurityToken
      */
     static public function get($reuse = false)
     {
-        if(!isset(self::$_token))
-        {
-        	$session 		= KFactory::get('lib.joomla.session');
-        	if($reuse && $token = $session->get('koowa.security.token')) {
-        		// Re-use the previous token from the session
-        		self::$_token = $token;
-        	} else {
-        		// Generate a new token
-        		self::$_token = md5(uniqid(rand(), TRUE));
-        	}
-
-            $session->set('koowa.security.token', self::$_token);
-            $session->set('koowa.security.tokentime', time());
-        }
-
-        return self::$_token;
+        return  JUtility::getToken($forceNew);
     }
 
     /**
@@ -80,12 +65,25 @@ class KSecurityToken
      */
     static public function check($max_age = 600)
     {
-    	$session	= KFactory::get('lib.joomla.session');
-        $token		= $session->get('koowa.security.token', null);
-		$age 		= time() - $session->get('koowa.security.tokentime');
-		
-        $req		= KInput::get('_token', 'post', 'md5'); 
-		
-        return ($req===$token && $age <= $max_age);
+    	// Using getVar instead of getString, because if the request is not a string, 
+		// we consider it a hacking attempt
+        $req		= JRequest::getVar('_token', null, 'post', 'alnum');
+        $token		= self::get();
+        
+        return (self::isMd5($req) && $req===$token);
+    }
+    
+ 	/**
+     * Check if a string is a valid md5 (32 digit hexadecimal number)
+     * 
+     * @todo	Move to a separate validation class?
+     * 
+     * @param 	mixed	Variable to be tested
+     * @return 	bool
+     */
+    static public function isMd5($var)
+    {
+    	$pattern = '/^[0-9a-f]{32}$/';
+    	return (is_string($var) && preg_match($pattern, $var) == 1);
     }
 }
