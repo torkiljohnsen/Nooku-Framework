@@ -5,7 +5,7 @@
 	default="main">
 
 	<property name="koowa_scm" override="true"
-		value="https://joomlatools.unfuddle.com/svn/joomlatools_koowa/releases/0.6/code" />
+		value="https://joomlatools.unfuddle.com/svn/joomlatools_koowa/tags/0.6.1/code" />
 	<property name="targetdir" value="packages" override="true" />
 	<property name="targetfile" override="true" value="koowa_v0.6.1.tar.gz" />
 	
