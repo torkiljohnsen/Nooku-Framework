@@ -469,11 +469,11 @@ abstract class KViewAbstract extends KObject
 	}
 	
 	/**
-	 * Create a route
-	 * 
-	 * Prepend the route with option query information based on the view name
-	 * and the file to call.
-	 * 
+	 * Create a route. Index.php, option, view and layout can be ommitted. The 
+	 * following variations will all result in the same route
+	 * foo=bar
+	 * option=com_mycomp&view=myview&foo=bar
+	 * index.php?option=com_mycomp&view=myview&foo=bar
 	 * In templates, use @route()
 	 *
 	 * @param	string	The data to use to create the route
@@ -481,22 +481,40 @@ abstract class KViewAbstract extends KObject
 	 */
 	public function createRoute( $route = '')
 	{
-		$parts = array();
-		parse_str($route, $parts);
+		$route = trim($route);
 		
-		//Check to see if there is view information in the route if not add it
-		if(!isset($parts['view'])) 
-		{
-			$view = 'view='.$this->getClassName('suffix');
-			if(!isset($parts['layout']) && $this->_layout != 'default') {
-				$view .= '&layout='.$this->_layout;
-			}
-			
-			$route = $view.'&'.$route;
+		// special cases
+		if($route == 'index.php' || $route == 'index.php?' || empty($route)) {
+			return JRoute::_($route);
 		}
 		
-		//Prepent the entry file and component information
-		$route = 'index.php?option=com_'.$this->getClassName('prefix').'&'.$route;
-		return JRoute::_($route);
+		// strip 'index.php?' 
+		if(substr($route, 0, 10)=='index.php?') {
+			$route = substr($route, 10);
+		}
+		
+		// parse
+		$parts = array();
+		parse_str($route, $parts);
+		$result = array();
+		
+		// Check to see if there is component information in the route if not add it
+		if(!isset($parts['option'])) {
+			$result[] = 'option=com_'.$this->getClassName('prefix');
+		}
+
+		// Check to see if there is view information in the route if not add it
+		if(!isset($parts['view'])) 
+		{
+			$result[] = 'view='.$this->getClassName('suffix');
+			if(!isset($parts['layout']) && $this->_layout != 'default') {
+				$result[] = 'layout='.$this->_layout;
+			}
+		}
+		
+		// Reconstruct the route
+		$result[] = $route;
+		$result = implode('&', $result);
+		return JRoute::_('index.php?'.$result);
 	}
 }
