@@ -60,16 +60,14 @@ class KInput
 				throw new KInputException('Unknown hash: '.$hash);
 			}		
 		}
-		
+				
 		// find $var in the hashes
-		$result = null;
+		$result	= null;
 		foreach($hashes as $hash) 
 		{
-			if(isset($GLOBALS['_'.$hash][$var])) 
-			{
-				$result = $GLOBALS['_'.$hash][$var];
+			if($result = self::_getNested($GLOBALS['_'.$hash], self::_split($var))) {
 				break;
-			}
+			}			
 		}
 				
 		// return the default value if $var wasn't set in any of the hashes
@@ -144,13 +142,61 @@ class KInput
 		}
 		
 		// add to hash in the superglobal
-		$GLOBALS['_'.$hash][$var] 		= $value;
+		$parts = self::_split($var);
+		self::_setNested($GLOBALS['_'.$hash], $parts, $value);
+		
 		
 		// Add to _REQUEST hash if original hash is get, post, or cookies
 		// Even though we are not using $_REQUEST, other extensions do 
 		if(in_array($hash, array('GET', 'POST', 'COOKIE'))) {
-			$GLOBALS['_REQUEST'][$var] 	= $value;
+			self::_setNested($GLOBALS['_REQUEST'], $parts, $value);
 		}
+	}
+	
+	/**
+	 * Split foo[bar][bar] into an array
+	 *
+	 * @param 	string	Variable name
+	 * @return 	array
+	 */
+	protected function _split($varname)
+	{
+		$parts = array();
+		$pattern = "/\[?([a-zA-Z0-9_-]+)\]?/";
+		if(!preg_match_all($pattern, $varname, $parts)){
+			throw KInputException("Couldn't split string to array: ".$varname);
+		}
+		return $parts[1];
+	}
+	
+	/**
+	 * Get a value from nested array
+	 *
+	 * @param 	array	The array to search in
+	 * @param	array	A list of keys (foo, bar)
+	 * @return 	mixed	The value of array[foo][bar], or null
+	 */
+	protected function _getNested($array, $keys)
+	{
+		$tmp = $array;
+		foreach($keys as $key)
+		{
+			if(array_key_exists($key, $tmp)) {
+				$tmp = $tmp[$key];
+			} else {
+				return null;
+			}
+		}
+		return $tmp;
+	}
+	
+	protected function _setNested(&$array, $keys, $value)
+	{
+		foreach(array_reverse($keys) as $key)
+		{
+			$value = array($key => $value);
+		}
+		$array = array_merge($value, $array);
 	}
 	
 	/**
