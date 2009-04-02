@@ -192,7 +192,7 @@ class KInput
 	
 	protected function _setNested(&$array, $keys, $value)
 	{
-		foreach(array_reverse($keys) as $key)
+		foreach(array_reverse($keys, true) as $key)
 		{
 			$value = array($key => $value);
 		}
