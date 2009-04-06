@@ -201,7 +201,7 @@ class KProxyJoomlaApplication extends KPatternProxy
 		
 		if($this->_commandChain->run('application.before.login', $args) === true) {
 			$args['result'] = $this->getObject()->login($args['credentials'], $args['options']);
-			$this->_commandChain->run('application.after.execute', $args);
+			$this->_commandChain->run('application.after.login', $args);
 		}
 		
 		return $args['result'];
