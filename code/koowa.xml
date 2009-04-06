@@ -11,13 +11,13 @@
 	<description>Rapid Application Development framework. Please check if you have PHP 5.2+ before publishing this plugin.</description>	
 	
 	<!--  Files -->
-	<files>
+	<files folder="plugins/system">
 		<filename plugin="koowa">koowa.php</filename>
 		<folder>koowa</folder>
 	</files>
 	
 	<!--  Media -->
-	<media destination="plg_koowa" folder="media">
+	<media destination="plg_koowa" folder="media/plg_koowa">
 		<folder>images</folder>
 		<folder>js</folder>
 		<folder>swf</folder>
