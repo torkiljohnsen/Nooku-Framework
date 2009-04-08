@@ -40,7 +40,7 @@ class KInput
 	 * When no sanitizers are supplied, the same filters as the validators will 
 	 * be used.
 	 * 
-	 * @param	string			Variable name
+	 * @param	string			Variable name eg 'foo[bar]'
 	 * @param 	string|array  	Hash(es) [COOKIE|ENV|FILES|GET|POST|SERVER]
 	 * @param 	mixed			Validator(s), can be a KFilterInterface object, or array of objects 
 	 * @param 	mixed			Sanitizer(s), can be a KFilterInterface object, or array of objects
@@ -129,7 +129,7 @@ class KInput
 	/**
 	 * Set a variable in the request
 	 *
-	 * @param 	mixed	Variable name
+	 * @param 	mixed	Variable name eg 'foo[bar]'
 	 * @param 	mixed	Variable value
 	 * @param 	string|array  	Hash(es) [COOKIE|ENV|FILES|GET|POST|SERVER]
 	 */
