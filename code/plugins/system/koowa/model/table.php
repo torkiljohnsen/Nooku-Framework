@@ -265,7 +265,7 @@ class KModelTable extends KModelAbstract
 		$app 	= KFactory::get('lib.joomla.application');
     	
     	// Get the namespace
-    	$ns  	= $app->getName().':'.'com.'.$this->getClassName('prefix').'.model.'.$this->getClassName('suffix');
+    	$ns  	= $app->getName().'::'.'com.'.$this->getClassName('prefix').'.model.'.$this->getClassName('suffix');
 
         $state = parent::getDefaultState();
         $state['order']      = $app->getUserStateFromRequest($ns.'.filter_order', 'filter_order', '', 'cmd');
