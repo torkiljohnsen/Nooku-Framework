@@ -92,11 +92,7 @@ abstract class KViewAbstract extends KObject
         $this->setEscape($options['escape']);
 
 		// Set a base path for use by the view
-		if ($options['base_path']) {
-			$this->_basePath	= $options['base_path'];
-		} else {
-			$this->_basePath	= JPATH_COMPONENT.DS.'views'.DS.$this->getClassName('suffix');
-		}
+		$this->_basePath	= $options['base_path'];
 
 		// set the default template search path
 		if ($options['template_path']) {
@@ -135,7 +131,7 @@ abstract class KViewAbstract extends KObject
     protected function _initialize(array $options)
     {
         $defaults = array(
-            'base_path'     => JPATH_COMPONENT,
+            'base_path'     => JPATH_COMPONENT.DS.'views',
             'base_url'      => JURI::base(true),
             'charset'       => null, // TODO unused?
             'document'      => null,
@@ -160,16 +156,14 @@ abstract class KViewAbstract extends KObject
 	/**
 	* Execute and display a template script.
 	*
-	* @param string $tpl The name of the template file to parse;
-	* automatically searches through the template paths.
-	*
-	* @throws object An JError object.
-	* @see fetch()
+	* @param 	string $tpl The name of the template file to parse
+	* @return 	this
 	*/
 	public function display($tpl = null)
 	{
 		$result = $this->loadTemplate($tpl);
 		echo $result;
+		return $this;
 	}
 
 	/**
