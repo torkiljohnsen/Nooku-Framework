@@ -93,7 +93,7 @@ class KProxyJoomlaApplication extends KPatternProxy
 			$args['result'] = $this->getObject()->route();
 			$this->_commandChain->run('application.after.route', $args);
 		}
-
+		
 		return $args['result'];
  	}
  	
