@@ -38,6 +38,8 @@ class KControllerPage extends KControllerAbstract
 
 	/*
 	 * Generic edit action
+	 * 
+	 * @return void
 	 */
 	public function edit()
 	{
@@ -49,6 +51,8 @@ class KControllerPage extends KControllerAbstract
 
 	/*
 	 * Generic save action
+	 * 
+	 * @return KDatabaseRow The row object containing the saved data
 	 */
 	public function save()
 	{
@@ -85,10 +89,14 @@ class KControllerPage extends KControllerAbstract
 		$redirect .= '&format='.KInput::get('format', 'get', 'cmd', null, 'html');
 
 		$this->setRedirect($redirect);
+		
+		return $row;
 	}
 		
 	/*
 	 * Generic cancel action
+	 * 
+	 * @return void
 	 */
 	public function cancel()
 	{
@@ -102,6 +110,7 @@ class KControllerPage extends KControllerAbstract
 	 * Generic delete function
 	 *  
 	 * @throws KControllerException
+	 * @return void
 	 */
 	public function delete()
 	{
@@ -130,6 +139,8 @@ class KControllerPage extends KControllerAbstract
 
 	/*
 	 * Generic enable action
+	 * 
+	 * @return void
 	 */
 	public function enable()
 	{
@@ -160,6 +171,8 @@ class KControllerPage extends KControllerAbstract
 	
 	/**
 	 * Generic method to modify the access level of items
+	 * 
+	 * @return void
 	 */
 	public function access()
 	{
@@ -184,6 +197,11 @@ class KControllerPage extends KControllerAbstract
 		);
 	}
 	
+	/**
+	 * Generic method to modify the order of the items
+	 * 
+	 * @return KDatabaseRow The row object containing the reordered row
+	 */
 	public function order()
 	{
 		KSecurityToken::check() or die('Invalid token or time-out, please try again');
@@ -197,8 +215,8 @@ class KControllerPage extends KControllerAbstract
 		$view	   = $name;
 
 		$app   = KFactory::get('lib.joomla.application')->getName();
-		KFactory::get($app.'::com.'.$component.'.table.'.$name)
-			->fetchRow($id)
+		$table = KFactory::get($app.'::com.'.$component.'.table.'.$name);
+		$row   = $table->fetchRow($id)
 			->order($change);
 		
 		$this->setRedirect(
@@ -206,6 +224,7 @@ class KControllerPage extends KControllerAbstract
 			.'&format='.KInput::get('format', 'get', 'cmd', null, 'html')
 		);
 		
+		return $row;
 	}
 
 	/**
