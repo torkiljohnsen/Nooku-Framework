@@ -150,7 +150,7 @@ class KProxyJoomlaApplication extends KPatternProxy
 		$args['code']		= $code;
 		$args['task']       = 'close';
 		
-		if($this->_commandChain->run('application.before.execute', $args) === true) {
+		if($this->_commandChain->run('application.before.close', $args) === true) {
 			$this->getObject()->close($args['code']);
 		}
 
