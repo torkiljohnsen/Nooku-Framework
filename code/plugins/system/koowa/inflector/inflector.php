@@ -1,6 +1,6 @@
 <?php
 /**
- * @version		$Id:inflector.php 46 2008-03-01 18:39:32Z mjaz $
+ * @version		$Id$
  * @category	Koowa
  * @package		Koowa_Inflector
  * @copyright	Copyright (C) 2007 - 2009 Joomlatools. All rights reserved.
