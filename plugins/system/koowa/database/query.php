@@ -25,14 +25,14 @@ class KDatabaseQuery extends KObject
 	 * @var array
 	 */
 	public $operation = '';
-	
+
 	/**
 	 * The columns
 	 *
 	 * @var array
 	 */
 	public $columns = array();
-	
+
 	/**
 	 * The from element
 	 *
@@ -88,10 +88,10 @@ class KDatabaseQuery extends KObject
 	 * @var integer
 	 */
 	public $offset = null;
-	
+
 	/**
      * Data to bind into the query as key => value pairs.
-     * 
+     *
      * @var array
      */
     protected $_bind = array();
@@ -146,7 +146,7 @@ class KDatabaseQuery extends KObject
 	public function select( $columns = '*')
 	{
 		settype($columns, 'array'); //force to an array
-		
+
 		//Quote the identifiers
 		$columns = $this->_db->quoteName($columns);
 
@@ -154,7 +154,7 @@ class KDatabaseQuery extends KObject
 		$this->columns   = array_unique( array_merge( $this->columns, $columns ) );
 		return $this;
 	}
-	
+
 	/**
 	 * Built a count query
 	 *
@@ -166,7 +166,7 @@ class KDatabaseQuery extends KObject
 		$this->columns    = array();
 		return $this;
 	}
-	
+
 	/**
 	 * Make the query distinct
 	 *
@@ -187,20 +187,20 @@ class KDatabaseQuery extends KObject
 	public function from( $tables )
 	{
 		settype($tables, 'array'); //force to an array
-		
-		//Prepent the table prefix 
+
+		//Prepent the table prefix
 		array_walk($tables, array($this, '_prefix'));
-		
+
 		//Quote the identifiers
 		$tables = $this->_db->quoteName($tables);
-		
+
 		$this->from = array_unique( array_merge( $this->from, $tables ) );
 		return $this;
 	}
-	
+
 	/**
      * Built the join clause of the query
-     * 
+     *
      * @param string 		$type  		The type of join; empty for a plain JOIN, or "LEFT", "INNER", etc.
      * @param string 		$table 		The table name to join to.
      * @param string|array 	$condition  Join on this condition.
@@ -208,24 +208,24 @@ class KDatabaseQuery extends KObject
      * @return object KDatabaseQuery
      */
     public function join($type, $table, $condition)
-    {     
+    {
 		settype($condition, 'array'); //force to an array
-    	
+
 		$this->_prefix($table); //add a prefix to the table
-    	
+
 		//Quote the identifiers
 		$table     = $this->_db->quoteName($table);
 		$condition = $this->_db->quoteName($condition);
-	    	
+
     	$this->join[] = array(
         	'type'  	=> strtoupper($type),
         	'table' 	=> $table,
         	'condition' => $condition,
         );
-          
+
         return $this;
     }
-	
+
 	/**
 	 * Built the where clause of the query
 	 *
@@ -240,24 +240,24 @@ class KDatabaseQuery extends KObject
 		if(empty($property)) {
 			return $this;
 		}
-		
+
 		// Apply quotes to the property name
 		$property = $this->_db->quoteName($property);
-		
+
 		// Apply quotes to the value
 		$value    = $this->_db->quote($value);
-		
+
        	//Create the where clause
         if(in_array($constraint, array('IN', 'NOT IN'))) {
         	$value = ' ( '.$value. ' ) ';
         }
-		
+
 		$where = $property.' '.$constraint.' '.$value;
-        
+
 		//Prepend the condition
         if(count($this->where)) {
             $where = $condition .' '. $where;
-        } 
+        }
 
         $this->where = array_unique( array_merge( $this->where, array($where) ));
         return $this;
@@ -272,7 +272,7 @@ class KDatabaseQuery extends KObject
 	public function group( $columns )
 	{
 		settype($columns, 'array'); //force to an array
-		
+
 		//Quote the identifiers
 		$columns = $this->_db->quoteName($columns);
 
@@ -289,7 +289,7 @@ class KDatabaseQuery extends KObject
 	public function having( $columns )
 	{
 		settype($columns, 'array'); //force to an array
-		
+
 		//Quote the identifiers
 		$columns = $this->_db->quoteName($columns);
 
@@ -307,11 +307,11 @@ class KDatabaseQuery extends KObject
 	public function order( $columns, $direction = 'ASC' )
 	{
 		settype($columns, 'array'); //force to an array
-		
+
 		//Quote the identifiers
 		$columns = $this->_db->quoteName($columns);
-		
-		foreach($columns as $column) 
+
+		foreach($columns as $column)
 		{
 			$this->order[] = array(
         		'column'  	=> $column,
@@ -335,13 +335,13 @@ class KDatabaseQuery extends KObject
 		$this->offset = $offset;
 		return $this;
 	}
-	
+
 	/**
      * Adds data to bind into the query.
-     * 
+     *
      * @param 	mixed 	$key The replacement key in the query.  If this is an
-     * 						 array or object, the $val parameter is ignored, 
-     * 						 and all the key-value pairs in the array (or all 
+     * 						 array or object, the $val parameter is ignored,
+     * 						 and all the key-value pairs in the array (or all
      *   					 properties of the object) are added to the bind.
      * @param 	mixed 	$val The value to use for the replacement key.
      * @return object KDatabaseQuery
@@ -355,15 +355,15 @@ class KDatabaseQuery extends KObject
         } else {
             $this->_bind[$key] = $val;
         }
-        
+
         return $this;
     }
-    
+
     /**
      * Unsets bound data.
-     * 
+     *
      * @param 	mixed 	$spec 	The key to unset.  If a string, unsets that one
-     * 							bound value; if an array, unsets the list of values; 
+     * 							bound value; if an array, unsets the list of values;
      * 							if empty, unsets all bound values (the default).
      * @return object KDatabaseQuery
      */
@@ -377,18 +377,18 @@ class KDatabaseQuery extends KObject
                 unset($this->_bind[$key]);
             }
         }
-        
+
         return $this;
     }
 
 	/*
-	 * Callback for array_walk to prefix elements of array with given 
+	 * Callback for array_walk to prefix elements of array with given
 	 * prefix
-	 * 
+	 *
 	 * @param string $data 	The data to be prefixed
 	 */
 	protected function _prefix(&$data)
-	{	
+	{
 		// Prepend the table modifier
 		$data = '#__'.$data;
 	}
@@ -401,7 +401,7 @@ class KDatabaseQuery extends KObject
 	public function __toString()
 	{
 		$query = '';
-		
+
 		$query .= $this->operation.PHP_EOL;
 
 		if (!empty($this->columns)) {
@@ -411,24 +411,24 @@ class KDatabaseQuery extends KObject
 		if (!empty($this->from)) {
 			$query .= ' FROM '.implode(' , ', $this->from).PHP_EOL;
 		}
-		
+
 		if (!empty($this->join))
 		{
 			$joins = array();
-            foreach ($this->join as $join) 
+            foreach ($this->join as $join)
             {
             	$tmp = '';
-                
+
             	if (! empty($join['type'])) {
                     $tmp .= $join['type'] . ' ';
                 }
-               
+
                 $tmp .= 'JOIN ' . $join['table'];
                 $tmp .= ' ON ' . implode(' AND ', $join['condition']);
-           
+
                 $joins[] = $tmp;
             }
-            
+
             $query .= implode(PHP_EOL, $joins) .PHP_EOL;
 		}
 
@@ -436,30 +436,30 @@ class KDatabaseQuery extends KObject
 			$query .= ' WHERE '.implode(' ', $this->where).PHP_EOL;
 		}
 
-		if (!empty($this->_group)) {
+		if (!empty($this->group)) {
 			$query .= ' GROUP BY '.implode(' , ', $this->group).PHP_EOL;
 		}
 
-		if (!empty($this->_having)) {
+		if (!empty($this->having)) {
 			$query .= ' HAVING '.implode(' , ', $this->having).PHP_EOL;
 		}
-		
-		if (!empty($this->order) ) 
+
+		if (!empty($this->order) )
 		{
 			$query .= 'ORDER BY ';
-			
+
 			$list = array();
             foreach ($this->order as $order) {
             	$list[] = $order['column'].' '.$order['direction'];
             }
-            
+
             $query .= implode(' , ', $list) . PHP_EOL;
 		}
-	
+
 		if (isset($this->limit)) {
 			$query .= ' LIMIT '.$this->limit.' , '.$this->offset.PHP_EOL;
 		}
-		
+
 		return $query;
 	}
 }
