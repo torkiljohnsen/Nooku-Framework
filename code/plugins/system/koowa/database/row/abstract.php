@@ -63,7 +63,7 @@ abstract class KDatabaseRowAbstract extends KObject
 		// Set table object and class name
 		$this->_tableClass  = 'com.'.$this->getClassName('prefix').'.table.'.$this->getClassName('suffix');
 		$this->_table       = isset($options['table']) ? $options['table'] : KFactory::get($this->_tableClass);
-		
+
 		// Reset the row
 		$this->reset();
 
@@ -138,12 +138,12 @@ abstract class KDatabaseRowAbstract extends KObject
         if(array_key_exists('ordering', $properties) && $properties['ordering'] <= 0) {
         	$properties['ordering'] = $this->getTable()->getMaxOrder();
         }
-        	
+
         if($this->_data[$key])
         {
         	$this->_table->update($properties, $this->_data[$key]);
         }
-        else 
+        else
         {
         	if($this->_table->insert($properties)) {
         		$this->id = $this->_table->getDBO()->insertid();
@@ -174,7 +174,7 @@ abstract class KDatabaseRowAbstract extends KObject
         $this->_data = $this->_table->getDefaults();
         return $this;
     }
-    
+
     /**
      * Increase hit counter by 1
      *
@@ -187,14 +187,14 @@ abstract class KDatabaseRowAbstract extends KObject
 		}
 
 		$this->hits++;
-		$this->save();		
-		
+		$this->save();
+
 		return $this;
 	}
-	
+
 	/**
 	 * Move the row up or down in the ordering
-	 * 
+	 *
 	 * Requires an ordering field to be present in the table
 	 *
 	 * @param	int	Amount to move up or down
@@ -205,35 +205,35 @@ abstract class KDatabaseRowAbstract extends KObject
 		if (!in_array('ordering', $this->_table->getColumns())) {
 			throw new KDatabaseRowException("The table ".$this->_table->getTableName()." doesn't have a 'ordering' column.");
 		}
-		
+
 		//force to integer
 		settype($change, 'int');
-			
-		if($change !== 0) 
+
+		if($change !== 0)
 		{
 			$old = $this->ordering;
 			$new = $this->ordering + $change;
 			$new = $new <= 0 ? 1 : $new;
-		
+
 			$query =  'UPDATE `#__'.$this->_table->getTableName().'` ';
-			
+
 			if($change < 0) {
 				$query .= 'SET ordering = ordering+1 WHERE '.$new.' <= ordering AND ordering < '.$old;
 			} else {
 				$query .= 'SET ordering = ordering-1 WHERE '.$old.' < ordering AND ordering <= '.$new;
 			}
-			
+
 			$this->_table->getDBO()->execute($query);
 
 			$this->ordering = $new;
 			$this->save();
-		
+
 			$this->_table->reorder();
 		}
-		
+
 		return $this;
 	}
-	
+
 	/**
      * Returns the column/value data as an array.
      *
@@ -256,13 +256,13 @@ abstract class KDatabaseRowAbstract extends KObject
     public function __get($columnName)
     {
         $data = null;
-           
+
     	if($columnName == 'id') {
         	$data = $this->_data[$this->_table->getPrimaryKey()];
         } else {
         	$data = $this->_data[$columnName];
         }
-      
+
     	return $data;
     }
 
@@ -292,9 +292,9 @@ abstract class KDatabaseRowAbstract extends KObject
     public function __isset($columnName)
     {
         if($columnName == 'id') {
-        	$columnName = $this->_data[$this->_table->getPrimaryKey()];
+        	$columnName = $this->_table->getPrimaryKey();
         }
-    	
+
     	return array_key_exists($columnName, $this->_data);
     }
 
@@ -307,7 +307,7 @@ abstract class KDatabaseRowAbstract extends KObject
     {
     	$result = $this->_data;
     	$result['id'] = $this->id;
-    	
+
         return $result;
     }
 
@@ -322,8 +322,8 @@ abstract class KDatabaseRowAbstract extends KObject
     {
     	$properties = (array) $properties;
         $pk = $this->_table->getPrimaryKey();
-         
-        foreach ($properties as $k => $v) 
+
+        foreach ($properties as $k => $v)
         {
          	if('id' == $k) {
          		$this->_data[$pk] = $v;
