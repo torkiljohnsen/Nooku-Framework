@@ -290,9 +290,6 @@ class KDatabaseQuery extends KObject
 	{
 		settype($columns, 'array'); //force to an array
 
-		//Quote the identifiers
-		$columns = $this->_db->quoteName($columns);
-
 		$this->having = array_unique( array_merge( $this->having, $columns ));
 		return $this;
 	}
