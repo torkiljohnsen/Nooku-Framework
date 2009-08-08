@@ -25,19 +25,22 @@ class KTemplateRuleForm extends KObject implements KTemplateRuleInterface
 	 *
 	 * @param string $text
 	 */
-	public function parse(&$text) 
-	{		 
-		$contains_form 	= strpos($text, '</form>');
-		$is_get			= preg_match('/method=[\'"]get[\'"]/', $text);
-		$has_token		= strpos($text, 'KSecurityToken');
-				 
-        if( $contains_form && !$is_get && !$has_token) 
-        {
-        	$text = str_replace(
-        		'</form>', 
-        		KSecurityToken::render().PHP_EOL.'</form>', 
-        		$text
-        	);
-        }
+	public function parse(&$text)
+	{
+		// match all forms where method="post"
+		$form 		= '<\s*form\s*';
+		$anything 	= '.*';
+		$quote		= '["\']';
+		$method 	= '\s*method\s*=\s*'.$quote.'post'.$quote;
+		$close		= '>';
+		$pattern = '/('.$form.$anything.$method.$anything.$close.')/i';
+
+		// add hidden token field to each match
+		$replace = '\1'
+			.PHP_EOL
+			.'<input type="hidden" name="_token" value="'.JUtility::getToken().'" />';
+		$text = preg_replace($pattern, $replace, $text);
+
+		return $this;
 	}
 }
