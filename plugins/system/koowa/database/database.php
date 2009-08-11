@@ -157,7 +157,7 @@ class KDatabase extends KPatternProxy
 
 				$this->delete($table, $where);
 			} break;
-
+		
 			default : $this->select( $sql, $offset, $limit );
 		}
 	}
@@ -287,7 +287,7 @@ class KDatabase extends KPatternProxy
 		$args['limit'] 		= $limit;	
 		$args['notifier']   = $this;
 		$args['operation']	= self::OPERATION_SELECT;
-
+		
 		// Excute the insert operation
 		if($this->_commandChain->run('database.before.select', $args) === true) {
 			$args['result'] = $this->_object->setQuery( $args['sql'], $args['offset'], $args['limit'] );
@@ -452,7 +452,9 @@ class KDatabase extends KPatternProxy
 			$result = $this->_object->query();
 			
 			//Empty the sql to prevent the query from being executed twice
-			$this->_object->setQuery(''); 
+			//$this->_object->setQuery(''); 
+			//Removed to fix issue with com_banners, see #90. Could cause
+			//new issues, need to be verified.
 			return $result;
 		}
 		
