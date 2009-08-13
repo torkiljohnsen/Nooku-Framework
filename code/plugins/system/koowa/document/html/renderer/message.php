@@ -46,14 +46,16 @@ class KDocumentHtmlRendererMessage extends KDocumentRenderer
 			}
 		}
 
-		$contents .= "\n<dl id=\"system-message\" style=\"margin: 0px;\">";
 		// If messages exist render them
 		if (is_array($lists))
 		{
+			$contents .= "\n<dl id=\"system-message\">";
+			
 			// Build the return string
 			foreach ($lists as $type => $msgs)
 			{
-				if (count($msgs)) {
+				if (count($msgs)) 
+				{
 					$contents .= "\n<dt class=\"".strtolower($type)."\">".JText::_( $type )."</dt>";
 					$contents .= "\n<dd class=\"".strtolower($type)." message fade\">";
 					$contents .= "\n\t<ul>";
@@ -64,8 +66,10 @@ class KDocumentHtmlRendererMessage extends KDocumentRenderer
 					$contents .= "\n</dd>";
 				}
 			}
+			
+			$contents .= "\n</dl>";
 		}
-		$contents .= "\n</dl>";
+		
 		return $contents;
 	}
 }
