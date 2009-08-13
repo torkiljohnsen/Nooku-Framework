@@ -50,20 +50,6 @@ class plgSystemKoowa extends JPlugin
 		if( ! self::canEnable()) {	
 			return;
 		}
-		
-		//Replace the document object
-		$lang = KFactory::get('lib.joomla.language');
-		
-		$options = array (
-			'charset'	=> 'utf-8',
-			'language'	=> $lang->getTag(),
-			'direction'	=> $lang->isRTL() ? 'rtl' : 'ltr'
-		);
-		
-		$format = KInput::get('format', 'GET', 'word', 'word', 'html');
-			
-		$doc =& JFactory::getDocument();
-		$doc = KFactory::get('lib.koowa.document.'.$format, $options);
 	}
 	
 	/**
