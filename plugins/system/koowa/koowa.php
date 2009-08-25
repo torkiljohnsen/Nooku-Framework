@@ -33,7 +33,7 @@ class Koowa
     /**
      * Koowa version
      */
-    const _VERSION = '0.6.3';
+    const _VERSION = '0.6.4';
 
     /**
      * Path to Koowa libraries
@@ -59,7 +59,7 @@ class Koowa
 
         return self::$_path;
     }
-    
+
   	/**
      * Get the URL to a Koowa folder
      *
@@ -69,8 +69,8 @@ class Koowa
     public static function getURL($type)
     {
     	$url = '';
-    	
-    	switch($type) 
+
+    	switch($type)
     	{
     		case 'root' :
     			$url = JURI::root(true);
@@ -86,12 +86,12 @@ class Koowa
     			break;
     		case 'js' :
     			$url = JURI::root(true).'/media/plg_koowa/js/';
-    			break;	
+    			break;
     		default:
-    			throw new KException('No url of type: '.$type);	
+    			throw new KException('No url of type: '.$type);
     			break;
     	}
-    	
+
     	return $url;
     }
 
