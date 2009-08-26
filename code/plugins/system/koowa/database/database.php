@@ -32,21 +32,21 @@ class KDatabase extends KPatternProxy
 	 * @var int
 	 */
 	protected $_limit = 0;
-	
+
 	/**
 	 * Cached table metadata information
 	 *
 	 * @var 	array
 	 */
 	protected $_tables_cache;
-	
+
 	/**
 	 * The commandchain
 	 *
 	 * @var	object
 	 */
 	protected $_commandChain = null;
-	
+
 	/**
 	 * Database operations
 	 */
@@ -54,7 +54,7 @@ class KDatabase extends KPatternProxy
 	const OPERATION_INSERT = 2;
 	const OPERATION_UPDATE = 4;
 	const OPERATION_DELETE = 8;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -64,7 +64,7 @@ class KDatabase extends KPatternProxy
 	public function __construct($db)
 	{
 		parent::__construct($db);
-		
+
 		 //Create the command chain
         $this->_commandChain = new KPatternCommandChain();
         $this->_commandChain->enqueue(new KCommandEvent());
@@ -76,10 +76,10 @@ class KDatabase extends KPatternProxy
 	public function setQuery($sql, $offset = 0, $limit = 0, $prefix = '#__')
 	{
 		$result 	= false;
-		
+
 		//Convert any linebreaks to br tags, added to solve a bug with Virtuemart 1.1.2
 		$sql = str_replace('\r\n', '<br />', $sql);
-		
+
 		$operation 	= preg_split('/\s/', trim($sql), 2,  PREG_SPLIT_NO_EMPTY);
 
 		switch(strtoupper($operation[0]))
@@ -107,25 +107,25 @@ class KDatabase extends KPatternProxy
                 foreach($query['column_names'] as $key => $column_name) {
                     $data[$column_name] = $query['values'][$key]['value'];
                 }
-				
-				$this->insert($table, $data);		
+
+				$this->insert($table, $data);
 			} break;
 
 			case 'UPDATE' :
 			{
 				//Make sure the where statement is uppercase
 				$sql   = str_replace('where', 'WHERE', $sql);
-				
+
 				//Split the sql string
 				$where = substr($sql, strpos($sql, 'WHERE'));
 				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
-				
+
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
-				
+
 				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
@@ -133,7 +133,7 @@ class KDatabase extends KPatternProxy
 				foreach($query['column_names'] as $key => $column_name) {
 					$data[$column_name] = $query['values'][$key]['value'];
 				}
-				
+
 				$this->update($table, $data, $where);
 			} break;
 
@@ -141,23 +141,23 @@ class KDatabase extends KPatternProxy
 			{
 				//Make sure the where statement is uppercase
 				$sql = str_replace('where', 'WHERE', $sql);
-				
+
 				//Split the sql string
 				$where = substr($sql, strpos($sql, 'WHERE'));
 				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
-				
+
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
-				
+
 				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
 				$this->delete($table, $where);
 			} break;
-		
+
 			default : $this->select( $sql, $offset, $limit );
 		}
 	}
@@ -179,7 +179,7 @@ class KDatabase extends KPatternProxy
 			$data[$k] = $v;
 		}
 
-		if($this->insert( $this->replaceTablePrefix($table, '', '#__'), $data ) !== false) 
+		if($this->insert( $this->replaceTablePrefix($table, '', '#__'), $data ) !== false)
 		{
 			$id = $this->insertid();
 			if ($keyName && $id) {
@@ -222,12 +222,12 @@ class KDatabase extends KPatternProxy
 
 		return $this->update( $this->replaceTablePrefix($table, ''), $data, $where);
 	}
-	
+
 	/**
 	 * Proxy the database connector loadObject() method
-	 * 
+	 *
 	 * This functions also adds support for the legacy API. In case the object is passed
-	 * in by reference instead of returned. 
+	 * in by reference instead of returned.
 	 */
 	public function loadObject( &$object = null )
 	{
@@ -262,8 +262,8 @@ class KDatabase extends KPatternProxy
 	{
 		if(!isset($options['dbo'])) {
 			$options['dbo'] = $this;
-		} 
-		
+		}
+
 		$query = new KDatabaseQuery($options);
 		return $query;
 	}
@@ -283,11 +283,11 @@ class KDatabase extends KPatternProxy
 		// Create the arguments object
 		$args = new ArrayObject();
 		$args['sql'] 		= $sql;
-		$args['offset'] 	= $offset;	
-		$args['limit'] 		= $limit;	
+		$args['offset'] 	= $offset;
+		$args['limit'] 		= $limit;
 		$args['notifier']   = $this;
 		$args['operation']	= self::OPERATION_SELECT;
-		
+
 		// Excute the insert operation
 		if($this->_commandChain->run('database.before.select', $args) === true) {
 			$args['result'] = $this->_object->setQuery( $args['sql'], $args['offset'], $args['limit'] );
@@ -313,13 +313,13 @@ class KDatabase extends KPatternProxy
 		//Create the arguments object
 		$args = new ArrayObject();
 		$args['table'] 		= $table;
-		$args['data'] 		= $data;	
+		$args['data'] 		= $data;
 		$args['notifier']   = $this;
 		$args['operation']	= self::OPERATION_INSERT;
 		$args['insertid']	= null;
-		
+
 		//Excute the insert operation
-		if($this->_commandChain->run('database.before.insert', $args) === true) 
+		if($this->_commandChain->run('database.before.insert', $args) === true)
 		{
 			foreach($args['data'] as $key => $val)
 			{
@@ -329,13 +329,13 @@ class KDatabase extends KPatternProxy
 
 			$sql = 'INSERT INTO '.$this->quoteName('#__'.$args['table'] )
 				 . '('.implode(', ', $keys).') VALUES ('.implode(', ', $vals).')';
-				 	
+
 			$args['result']     = $this->execute($sql);
 			$args['insertid']	= $this->insertid();
-			
+
 			$this->_commandChain->run('database.after.insert', $args);
 		}
-		
+
 		return $args['result'];
 	}
 
@@ -356,13 +356,13 @@ class KDatabase extends KPatternProxy
 		//Create the arguments object
 		$args = new ArrayObject();
 		$args['table'] 		= $table;
-		$args['data']  		= $data;	
+		$args['data']  		= $data;
 		$args['notifier']   = $this;
 		$args['where']   	= $where;
 		$args['operation']	= self::OPERATION_UPDATE;
-	
+
 		//Excute the update operation
-		if($this->_commandChain->run('database.before.update', $args) ===  true) 	
+		if($this->_commandChain->run('database.before.update', $args) ===  true)
 		{
 			foreach($args['data'] as $key => $val) {
 				$vals[] = '`'.$key.'` = '.$this->_object->quote($val);
@@ -373,11 +373,11 @@ class KDatabase extends KPatternProxy
 			  	.' SET '.implode(', ', $vals)
 			  	.' '.$args['where']
 			;
-			
+
 			$args['result'] = $this->execute($sql);
 			$this->_commandChain->run('database.after.update', $args);
 		}
-		
+
         return $args['result'];
 	}
 
@@ -394,23 +394,23 @@ class KDatabase extends KPatternProxy
 		//Create the arguments object
 		$args = new ArrayObject();
 		$args['table'] 		= $table;
-		$args['data']  		= null;	
+		$args['data']  		= null;
 		$args['notifier']   = $this;
 		$args['where']   	= $where;
 		$args['operation']	= self::OPERATION_DELETE;
 
 		//Excute the delete operation
-		if($this->_commandChain->run('database.before.delete', $args) ===  true) 
+		if($this->_commandChain->run('database.before.delete', $args) ===  true)
 		{
 			//Create query statement
 			$sql = 'DELETE FROM '.$this->quoteName('#__'.$args['table'])
 				  .' '.$args['where']
 			;
-			
+
 			$args['result'] = $this->execute($sql);
-			$this->_commandChain->run('database.after.delete', $args);	
+			$this->_commandChain->run('database.after.delete', $args);
 		}
-		
+
 		return $args['result'];
 	}
 
@@ -438,30 +438,29 @@ class KDatabase extends KPatternProxy
 		//return $this->getAffectedRows();
 		return true;
 	}
-	
+
 	/**
 	 * Proxy the database connector query() method
-	 * 
+	 *
 	 * @return mixed A database resource if successful, FALSE if not.
 	 */
 	public function query()
 	{
-		if(!empty($this->_object->_sql)) 
-		{	
+		if(!empty($this->_object->_sql))
+		{
 			//Execute the actual query
 			$result = $this->_object->query();
-			
-			//Empty the sql to prevent the query from being executed twice
-			//$this->_object->setQuery(''); 
-			//Removed to fix issue with com_banners, see #90. Could cause
-			//new issues, need to be verified.
+
+			// Empty the sql to prevent the query from being executed twice
+			$this->_object->setQuery('');
+
 			return $result;
 		}
-		
+
 		if($this->_object->getErrorNum() !== 0) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -494,43 +493,43 @@ class KDatabase extends KPatternProxy
 	{
 		settype($tables, 'array'); //force to array
 		$result = array();
-		
+
 		foreach ($tables as $tblval)
-		{  
+		{
 			$table = $tblval;
 
-			if(!isset($this->_tables_cache[$tblval])) 
+			if(!isset($this->_tables_cache[$tblval]))
 			{
 				//Check the table if it already has a table prefix applied.
-				if(strpos($tblval, $this->getObject()->getPrefix()) === false) 
+				if(strpos($tblval, $this->getObject()->getPrefix()) === false)
 				{
 					if(substr($tblval, 0, 3) != '#__') {
 						$table = '#__'.$tblval;
 					}
-				} 
-				else 
+				}
+				else
 				{
 					$tblval = $this->replaceTablePrefix($tblval, '');
 				}
-			
+
 				$this->select( 'SHOW FIELDS FROM ' . $this->quoteName($table));
 				$fields = $this->loadObjectList();
-				
+
 				foreach ($fields as $field) {
 					$this->_tables_cache[$tblval][$field->Field] = $field;
 				}
 			}
-			
+
 			//Add the requested table to the result
 			$result[$tblval] = $this->_tables_cache[$tblval];
 		}
-		
+
 		return $result;
 	}
-	
+
 	/**
 	 * Get the result of the SHOW TABLE STATUS statement
-	 * 
+	 *
 	 * @param	string	LIKE clause, can cotnains a tablename with % wildcards
 	 * @param 	string	WHERE clause (MySQL5+ only)
 	 * @return	array	List of objects with table info
@@ -540,11 +539,11 @@ class KDatabase extends KPatternProxy
 		if(!empty($like)) {
 			$like = ' LIKE '.$this->quote($like);
 		}
-		
+
 		if(!empty($where)) {
 			$where = ' WHERE '.$where;
 		}
-		
+
 		$this->setQuery( 'SHOW TABLE STATUS'.$like.$where );
 		return $this->loadObjectList('Name');
 	}
@@ -644,89 +643,89 @@ class KDatabase extends KPatternProxy
     {
     	return $this->_object->getErrorMsg();
     }
-    
+
     /**
      * Safely quotes a value for an SQL statement.
-     * 
+     *
      * If an array is passed as the value, the array values are quoted
-     * and then returned as a comma-separated string; this is useful 
+     * and then returned as a comma-separated string; this is useful
      * for generating IN() lists.
-     * 
+     *
      * @param 	mixed 	$value 	The value to quote.
-     * @param	boolean	$escae	Default true to escape string, false to 
+     * @param	boolean	$escae	Default true to escape string, false to
      * 							leave the string unchanged
-     * 
+     *
      * @return string An SQL-safe quoted value (or a string of separated-
      * 				  and-quoted values).
      */
     public function quote($value, $escape = true)
     {
-        if (is_array($value)) 
+        if (is_array($value))
         {
             // quote array values, not keys, then combine with commas.
             foreach ($value as $k => $v) {
                 $value[$k] = $this->quote($v, $escape);
             }
             return implode(', ', $value);
-        } 
-        else 
+        }
+        else
         {
         	if(!is_numeric($value)) {
         		return $this->getObject()->quote($value, $escape);
         	}
-        	
+
         	return $value;
         }
     }
-    
+
    	/**
-     * Quotes a single identifier name (table, table alias, table column, 
+     * Quotes a single identifier name (table, table alias, table column,
      * index, sequence).  Ignores empty values.
-     * 
+     *
      * If the name contains ' AS ', this method will separately quote the
      * parts before and after the ' AS '.
-     * 
+     *
      * If the name contains a space, this method will separately quote the
      * parts before and after the space.
-     * 
+     *
      * If the name contains a dot, this method will separately quote the
      * parts before and after the dot.
-     * 
+     *
      * @param string|array $spec The identifier name to quote.  If an array,
      * quotes each element in the array as an identifier name.
-     * 
+     *
      * @return string|array The quoted identifier name (or array of names).
-     * 
+     *
      * @see _quoteName()
      */
     public function quoteName($spec)
     {
-    	if (is_array($spec)) 
+    	if (is_array($spec))
         {
             foreach ($spec as $key => $val) {
                 $spec[$key] = $this->quoteName($val);
             }
             return $spec;
         }
-        
+
         // no extraneous spaces
         $spec = trim($spec);
-        
+
         // `original` AS `alias`
         $pos = strrpos($spec, ' AS ');
-        if ($pos) 
+        if ($pos)
         {
         	// recurse to allow for "table.col"
             $orig  = $this->quoteName(substr($spec, 0, $pos));
             // use as-is
             $alias = $this->_quoteName(substr($spec, $pos + 4));
-           
+
             return "$orig AS $alias";
         }
-        
+
      	// `original` `alias`
         $pos = strrpos($spec, ' = ');
-        if ($pos) 
+        if ($pos)
         {
             // recurse to allow for "table.col"
             $orig = $this->quoteName(substr($spec, 0, $pos));
@@ -734,10 +733,10 @@ class KDatabase extends KPatternProxy
             $alias = $this->quoteName(substr($spec, $pos + 3));
             return "$orig = $alias";
         }
-        
+
         // `original` `alias`
         $pos = strrpos($spec, ' ');
-        if ($pos) 
+        if ($pos)
         {
             // recurse to allow for "table.col"
             $orig = $this->quoteName(substr($spec, 0, $pos));
@@ -745,24 +744,24 @@ class KDatabase extends KPatternProxy
             $alias = $this->_quoteName(substr($spec, $pos + 1));
             return "$orig $alias";
         }
-        
+
         // `table`.`column`
         $pos = strrpos($spec, '.');
-        if ($pos) 
+        if ($pos)
         {
             // use both as-is
             $table = $this->_quoteName(substr($spec, 0, $pos));
             $col   = $this->_quoteName(substr($spec, $pos + 1));
             return "$table.$col";
         }
-        
+
         // `name`
         return $this->_quoteName($spec);
     }
-    
+
     /**
      * Quotes an identifier name (table, index, etc). Ignores empty values.
-     * 
+     *
      * @param string $name The identifier name to quote.
      * @return string The quoted identifier name.
      * @see quoteName()
@@ -770,13 +769,13 @@ class KDatabase extends KPatternProxy
     protected function _quoteName($name)
     {
         $name = trim($name);
-        
+
         //Special cases
         if ($name == '*' || is_numeric($name)) {
             return $name;
         }
-         
+
         return $this->_object->_nameQuote. $name.$this->_object->_nameQuote;
     }
-    
+
 }
