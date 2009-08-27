@@ -2,13 +2,13 @@
 <install version="1.5" type="plugin" group="system">
 	<name>System - Koowa</name>
 	<author>Nooku Team</author>
-	<creationDate>April 2009</creationDate>
+	<creationDate>September 2009</creationDate>
 	<copyright>Copyright (C) 2007 - 2009 Johan Janssens and Mathias Verraes. All rights reserved.</copyright>
 	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
 	<authorEmail>support@nooku.org</authorEmail>
 	<authorUrl>www.nooku.org</authorUrl>
 	<version>0.6.4</version>
-	<description>Rapid Application Development framework. Please check if you have PHP 5.2+ before publishing this plugin.</description>	
+	<description>Rapid Extension Development Framework. Please check if you have PHP 5.2+ before publishing this plugin.</description>	
 	
 	<!--  Files -->
 	<files folder="plugins/system">
