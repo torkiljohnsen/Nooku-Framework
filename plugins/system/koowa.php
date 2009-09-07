@@ -20,31 +20,27 @@ class plgSystemKoowa extends JPlugin
 {
 	public function __construct($subject, $config = array())
 	{
-		// Require the library loader
-		if( self::canEnable()) 
-		{	
-			require_once JPATH_PLUGINS.DS.'system'.DS.'koowa'.DS.'koowa.php';
-			require_once JPATH_PLUGINS.DS.'system'.DS.'koowa'.DS.'loader.php';
+		require_once JPATH_PLUGINS.DS.'system'.DS.'koowa'.DS.'koowa.php';
+		require_once JPATH_PLUGINS.DS.'system'.DS.'koowa'.DS.'loader.php';
 			
-			// Proxy the application object 
-			$app  =& JFactory::getApplication();
-			$app  = new KProxyJoomlaApplication($app);
+		// Proxy the application object 
+		$app  =& JFactory::getApplication();
+		$app  = new KProxyJoomlaApplication($app);
 		
-			// Don't proxy the dataase if we are in com_installer
-			if(KInput::get('option', 'request', 'cmd') != 'com_installer')
-			{
-				// Proxy the database object
-				$db  =& JFactory::getDBO();
-				$db  = new KDatabase($db);
+		// Don't proxy the dataase if we are in com_installer
+		if(KInput::get('option', array('get', 'post'), 'cmd') != 'com_installer')
+		{
+			// Proxy the database object
+			$db  =& JFactory::getDBO();
+			$db  = new KDatabase($db);
 			
-				//ACL uses the unwrapped DBO
-	        	$acl = JFactory::getACL();
-	        	$acl->_db = $db->getObject(); // getObject returns the unwrapped DBO
-			}
-			
-			//Load the koowa plugins
-			JPluginHelper::importPlugin('koowa', null, true, KFactory::get('lib.koowa.event.dispatcher'));
+			//ACL uses the unwrapped DBO
+	        $acl = JFactory::getACL();
+	        $acl->_db = $db->getObject(); // getObject returns the unwrapped DBO
 		}
+			
+		//Load the koowa plugins
+		JPluginHelper::importPlugin('koowa', null, true, KFactory::get('lib.koowa.event.dispatcher'));
 		
 		parent::__construct($subject, $config = array());
 	}
