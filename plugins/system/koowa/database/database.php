@@ -109,6 +109,7 @@ class KDatabase extends KPatternProxy
                 }
 
 				$this->insert($table, $data);
+				$this->_object->setQuery(''); //prevent duplicate queries
 			} break;
 
 			case 'UPDATE' :
@@ -135,6 +136,7 @@ class KDatabase extends KPatternProxy
 				}
 
 				$this->update($table, $data, $where);
+				$this->_object->setQuery(''); //prevent duplicate queries
 			} break;
 
 			case 'DELETE'  :
@@ -156,6 +158,7 @@ class KDatabase extends KPatternProxy
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
 
 				$this->delete($table, $where);
+				$this->_object->setQuery(''); //prevent duplicate queries
 			} break;
 
 			default : $this->select( $sql, $offset, $limit );
@@ -450,10 +453,6 @@ class KDatabase extends KPatternProxy
 		{
 			//Execute the actual query
 			$result = $this->_object->query();
-
-			// Empty the sql to prevent the query from being executed twice
-			$this->_object->setQuery('');
-
 			return $result;
 		}
 
