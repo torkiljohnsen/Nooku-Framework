@@ -30,48 +30,22 @@ class plgSystemKoowa extends JPlugin
 			$app  =& JFactory::getApplication();
 			$app  = new KProxyJoomlaApplication($app);
 		
-			// Proxy the database object
-			$db  =& JFactory::getDBO();
-			$db  = new KDatabase($db);
+			// Don't proxy the dataase if we are in com_installer
+			if(KInput::get('option', 'request', 'cmd') != 'com_installer')
+			{
+				// Proxy the database object
+				$db  =& JFactory::getDBO();
+				$db  = new KDatabase($db);
 			
-			//ACL uses the unwrapped DBO
-	        $acl = JFactory::getACL();
-	        $acl->_db = $db->getObject(); // getObject returns the unwrapped DBO
+				//ACL uses the unwrapped DBO
+	        	$acl = JFactory::getACL();
+	        	$acl->_db = $db->getObject(); // getObject returns the unwrapped DBO
+			}
 			
 			//Load the koowa plugins
 			JPluginHelper::importPlugin('koowa', null, true, KFactory::get('lib.koowa.event.dispatcher'));
 		}
 		
 		parent::__construct($subject, $config = array());
-	}
-
-	public function onAfterRoute()
-	{
-		if( ! self::canEnable()) {	
-			return;
-		}
-	}
-	
-	/**
-	 * Check if the current request requires Koowa to be turned off
-	 * 
-	 * Eg. Koowa should be disabled when uninstalling plugins
-	 *
-	 * @return	bool
-	 */
-	public static function canEnable()
-	{
-		$result = true;
-		
-		// Note: can't use KInput, Koowa isn't loaded yet
-		
-		// are we uninstalling a plugin?
-		if(JRequest::getCmd('option') == 'com_installer' 
-			&& JRequest::getCmd('task') == 'remove'
-			&& JRequest::getCmd('type') == 'plugins' ) {
-			$result = false;
-		}
-		
-		return $result;
 	}
 }
