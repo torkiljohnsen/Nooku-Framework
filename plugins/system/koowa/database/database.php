@@ -76,7 +76,7 @@ class KDatabase extends KPatternProxy
 	public function setQuery($sql, $offset = 0, $limit = 0, $prefix = '#__')
 	{
 		$result 	= false;
-
+		
 		//Convert any linebreaks to br tags, added to solve a bug with Virtuemart 1.1.2
 		$sql = str_replace('\r\n', '<br />', $sql);
 
@@ -116,20 +116,24 @@ class KDatabase extends KPatternProxy
 			{
 				//Make sure the where statement is uppercase
 				$sql   = str_replace('where', 'WHERE', $sql);
-
+				
 				//Split the sql string
-				$where = substr($sql, strpos($sql, 'WHERE'));
-				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
-
+				$where = '';
+				$query = $sql.' WHERE 1 = 1';
+				
+				if($pos = strpos($sql, 'WHERE')) {
+					$where = substr($sql, $pos);
+					$query = substr_replace($sql, 'WHERE 1 = 1', $pos);
+				}
+			
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
 					$this->select($sql);
 					break;
 				}
-
+				
 				//Remove prefix from the table name
 				$table = str_replace($this->getPrefix(), '', $query['table_names'][0]);
-
 				$data  = array();
 				foreach($query['column_names'] as $key => $column_name) {
 					$data[$column_name] = $query['values'][$key]['value'];
@@ -145,8 +149,13 @@ class KDatabase extends KPatternProxy
 				$sql = str_replace('where', 'WHERE', $sql);
 
 				//Split the sql string
-				$where = substr($sql, strpos($sql, 'WHERE'));
-				$query = substr_replace($sql, 'WHERE 1 = 1', strpos($sql, 'WHERE'));
+				$where = '';
+				$query = $sql.' WHERE 1 = 1';
+				
+				if($pos = strpos($sql, 'WHERE')) {
+					$where = substr($sql, $pos);
+					$query = substr_replace($sql, 'WHERE 1 = 1', $pos);
+				}
 
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
