@@ -82,7 +82,11 @@ class KInput
 			array_walk_recursive($result, 'trim');
 		}
 		
-	
+		// Handle magic quotes compatability
+		if (get_magic_quotes_gpc() && ($hash != 'FILES')) {
+			$result = self::_stripSlashes( $result );
+		}
+		
 		// if $validators or $sanitizers is an object, turn it into an array of objects
 		// don't use settype because it will convert objects to arrays
 		$validators = is_array($validators) ? $validators : (empty($validators) ? array() : array($validators));
@@ -198,6 +202,18 @@ class KInput
 		}
 		
 		$array = array_merge($array, $value);
+	}
+	
+	/**
+	 * Strips slashes recursively on an array
+	 *
+	 * @param	array	Array of (nested arrays of) strings
+	 * @return	array	The input array with stripshlashes applied to it
+	 */
+	protected function _stripSlashes( $value )
+	{
+		$value = is_array( $value ) ? array_map( array( 'KInput', '_stripSlashes' ), $value ) : stripslashes( $value );
+		return $value;
 	}
 	
 	/**
