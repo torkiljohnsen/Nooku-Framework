@@ -77,15 +77,15 @@ class KDatabase extends KPatternProxy
 	{
 		$result 	= false;
 		
-		//Convert any linebreaks to br tags, added to solve a bug with Virtuemart 1.1.2
-		$sql = str_replace('\r\n', '<br />', $sql);
-
 		$operation 	= preg_split('/\s/', trim($sql), 2,  PREG_SPLIT_NO_EMPTY);
 
 		switch(strtoupper($operation[0]))
 		{
 			case 'INSERT' :
 			{
+				//Fix a bug in the query parser, linebreaks are converted to rn
+				$query = str_replace(array('\r\n' ,'\n'), array('\\\r\\\n', '\\\n'), $query);
+				
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($sql, '', $prefix))) {
 					$this->select($sql);
@@ -108,12 +108,13 @@ class KDatabase extends KPatternProxy
                     $data[$column_name] = $query['values'][$key]['value'];
                 }
 
-				$this->insert($table, $data);
+				$this->insert($table, $data, false);
 				$this->_object->setQuery(''); //prevent duplicate queries
 			} break;
 
 			case 'UPDATE' :
 			{
+
 				//Make sure the where statement is uppercase
 				$sql   = str_replace('where', 'WHERE', $sql);
 				
@@ -125,6 +126,9 @@ class KDatabase extends KPatternProxy
 					$where = substr($sql, $pos);
 					$query = substr_replace($sql, 'WHERE 1 = 1', $pos);
 				}
+				
+			    //Fix a bug in the query parser, linebreaks are converted to rn
+				$query = str_replace(array('\r\n' ,'\n'), array('\\\r\\\n', '\\\n'), $query);
 			
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($query, '', $prefix))) {
@@ -138,8 +142,8 @@ class KDatabase extends KPatternProxy
 				foreach($query['column_names'] as $key => $column_name) {
 					$data[$column_name] = $query['values'][$key]['value'];
 				}
-
-				$this->update($table, $data, $where);
+				
+				$this->update($table, $data, $where, false);
 				$this->_object->setQuery(''); //prevent duplicate queries
 			} break;
 
@@ -191,7 +195,7 @@ class KDatabase extends KPatternProxy
 			$data[$k] = $v;
 		}
 
-		if($this->insert( $this->replaceTablePrefix($table, '', '#__'), $data ) !== false)
+		if($this->insert( $this->replaceTablePrefix($table, '', '#__'), $data) !== false)
 		{
 			$id = $this->insertid();
 			if ($keyName && $id) {
@@ -320,7 +324,7 @@ class KDatabase extends KPatternProxy
      *
      * @return integer  		Number of rows affected
      */
-	public function insert($table, array $data)
+	public function insert($table, array $data, $quote = true)
 	{
 		//Create the arguments object
 		$args = new ArrayObject();
@@ -335,7 +339,7 @@ class KDatabase extends KPatternProxy
 		{
 			foreach($args['data'] as $key => $val)
 			{
-				$vals[] = $this->_object->quote($val);
+				$vals[] = ($quote ? $this->_object->quote($val) : "'$val'");
 				$keys[] = '`'.$key.'`';
 			}
 
@@ -363,7 +367,7 @@ class KDatabase extends KPatternProxy
      *
      * @return integer Number of rows affected
      */
-	public function update($table, array $data, $where = null)
+	public function update($table, array $data, $where = null, $quote = true)
 	{
 		//Create the arguments object
 		$args = new ArrayObject();
@@ -372,12 +376,13 @@ class KDatabase extends KPatternProxy
 		$args['notifier']   = $this;
 		$args['where']   	= $where;
 		$args['operation']	= self::OPERATION_UPDATE;
-
+		
 		//Excute the update operation
 		if($this->_commandChain->run('database.before.update', $args) ===  true)
 		{
-			foreach($args['data'] as $key => $val) {
-				$vals[] = '`'.$key.'` = '.$this->_object->quote($val);
+			foreach($args['data'] as $key => $val) 
+			{
+				$vals[] = '`'.$key.'` = '.($quote ? $this->_object->quote($val) : "'$val'");
 			}
 
 			//Create query statement
@@ -385,7 +390,7 @@ class KDatabase extends KPatternProxy
 			  	.' SET '.implode(', ', $vals)
 			  	.' '.$args['where']
 			;
-
+			
 			$args['result'] = $this->execute($sql);
 			$this->_commandChain->run('database.after.update', $args);
 		}
