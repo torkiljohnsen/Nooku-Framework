@@ -84,7 +84,7 @@ class KDatabase extends KPatternProxy
 			case 'INSERT' :
 			{
 				//Fix a bug in the query parser, linebreaks are converted to rn
-				$query = str_replace(array('\r\n' ,'\n'), array('\\\r\\\n', '\\\n'), $query);
+				$sql = str_replace(array('\r\n' ,'\n'), array('\\\r\\\n', '\\\n'), $sql);
 				
 				$parser = new KDatabaseQueryParser();
 				if(!$query  = $parser->parse($this->replaceTablePrefix($sql, '', $prefix))) {
