@@ -284,6 +284,14 @@ abstract class KDatabaseTableAbstract extends KObject
 
  	            $this->_fields[$name] = $description;
  	        }
+ 	        
+			//No primary key found, use default
+ 	        if(!isset($this->_primary))
+ 	        {
+            	$prefix         = $this->getClassName('prefix');
+            	$suffix         = KInflector::singularize($this->getClassName('suffix'));
+				$this->_primary = empty($prefix) ? $suffix.'_id' : $prefix.'_'.$suffix.'_id';
+ 	        }
         }
 
 		return $this->_fields;
