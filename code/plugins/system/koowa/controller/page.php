@@ -43,7 +43,7 @@ class KControllerPage extends KControllerAbstract
 	 */
 	public function edit()
 	{
-		$cid = KInput::get('cid', 'get', 'array.ints', null, array(0));
+		$cid = KInput::get('cid', array('post', 'get'), 'array.ints', null, array(0));
 		$id	 = KInput::get('id', 'get', 'int', null, $cid[0]);
 		 
 		$this->setRedirect('view='.$this->getClassName('suffix').'&layout=form&id='.$id);
