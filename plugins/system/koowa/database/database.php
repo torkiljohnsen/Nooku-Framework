@@ -339,7 +339,7 @@ class KDatabase extends KPatternProxy
 		{
 			foreach($args['data'] as $key => $val)
 			{
-				$vals[] = ($quote ? $this->_object->quote($val) : "'$val'");
+				$vals[] = ($quote ? $this->_object->quote($val) : $val);
 				$keys[] = '`'.$key.'`';
 			}
 
@@ -382,7 +382,7 @@ class KDatabase extends KPatternProxy
 		{
 			foreach($args['data'] as $key => $val) 
 			{
-				$vals[] = '`'.$key.'` = '.($quote ? $this->_object->quote($val) : "'$val'");
+				$vals[] = '`'.$key.'` = '.($quote ? $this->_object->quote($val) : $val);
 			}
 
 			//Create query statement
