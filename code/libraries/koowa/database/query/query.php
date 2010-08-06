@@ -95,6 +95,13 @@ class KDatabaseQuery extends KObject
 	 * @var integer
 	 */
 	public $offset = 0;
+	
+	/**
+     * Data to bind into the query as key => value pairs.
+     * 
+     * @var array
+     */
+    protected $_bind = array();
 
 	/**
 	 * Database connector
@@ -155,7 +162,11 @@ class KDatabaseQuery extends KObject
 	 */
 	public function select( $columns = '*')
 	{
-		settype($columns, 'array'); //force to an array
+		if(func_num_args() > 1) {
+			$columns = func_get_args();
+		} else {
+			settype($columns, 'array');
+		}
 
 		$this->columns = array_unique( array_merge( $this->columns, $columns ) );
 		return $this;
@@ -192,8 +203,12 @@ class KDatabaseQuery extends KObject
 	 */
 	public function from( $tables )
 	{
-		settype($tables, 'array'); //force to an array
-
+		if(func_num_args() > 1) {
+			$tables = func_get_args();
+		} else {
+			settype($tables, 'array');
+		}
+	
 		//Prepent the table prefix
 		array_walk($tables, array($this, '_prefix'));
 
@@ -235,27 +250,27 @@ class KDatabaseQuery extends KObject
 	 */
 	public function where( $property, $constraint = null, $value = null, $condition = 'AND' )
 	{
-		if(empty($property)) {
-			return $this;
-		}
-		
-		$where = array();
-		$where['property'] = $property;
-
-		if(isset($constraint) && isset($value))
+		if(!empty($property)) 
 		{
-			$constraint	= strtoupper($constraint);
-			$condition	= strtoupper($condition);
-			
-        	$where['constraint'] = $constraint;
-        	$where['value']      = $value;
-		}
-		
-		$where['condition']  = count($this->where) ? $condition : '';
+			$where = array();
+			$where['property'] = $property;
 
-		//Make sure we don't store the same where clauses twice
-		$signature = md5($property.$where.$value);
-        $this->where[$signature] = $where;
+			if(isset($constraint) && isset($value))
+			{
+				$constraint	= strtoupper($constraint);
+				$condition	= strtoupper($condition);
+			
+        		$where['constraint'] = $constraint;
+        		$where['value']      = $value;
+			}
+		
+			$where['condition']  = count($this->where) ? $condition : '';
+
+			//Make sure we don't store the same where clauses twice
+			$signature = md5($property.$where.$value);
+        	$this->where[$signature] = $where;
+		}
+	
         return $this;
 	}
 
@@ -267,8 +282,12 @@ class KDatabaseQuery extends KObject
 	 */
 	public function group( $columns )
 	{
-		settype($columns, 'array'); //force to an array
-		
+		if(func_num_args() > 1) {
+			$columns = func_get_args();
+		} else {
+			settype($columns, 'array');
+		}
+			
 		$this->group = array_unique( array_merge( $this->group, $columns));
 		return $this;
 	}
@@ -281,7 +300,11 @@ class KDatabaseQuery extends KObject
 	 */
 	public function having( $columns )
 	{
-		settype($columns, 'array'); //force to an array
+		if(func_num_args() > 1) {
+			$columns = func_get_args();
+		} else {
+			settype($columns, 'array');
+		}
 
 		$this->having = array_unique( array_merge( $this->having, $columns ));
 		return $this;
@@ -322,7 +345,30 @@ class KDatabaseQuery extends KObject
 		$this->offset = $offset;
 		return $this;
 	}
-
+	
+	/**
+     * Adds data to bind into the query.
+     * 
+     * @param 	mixed 	The replacement key in the query.  If this is an
+     * 					array or object, the $val parameter is ignored, 
+     * 					and all the key-value pairs in the array (or all 
+     *   				properties of the object) are added to the bind.
+     * @param 	mixed 	The value to use for the replacement key.
+     * @return 	KDatabaseQuery
+     */
+    public function bind($key, $val = null)
+    {
+        if (is_array($key)) {
+            $this->_bind = array_merge($this->_bind, $key);
+        } elseif (is_object($key)) {
+            $this->_bind = array_merge((array) $this->_bind, $key);
+        } else {
+            $this->_bind[$key] = $val;
+        }
+        
+        return $this;
+    }
+    
 	/*
 	 * Callback for array_walk to prefix elements of array with given prefix
 	 *
@@ -390,7 +436,7 @@ class KDatabaseQuery extends KObject
                 }
 
                 $tmp .= 'JOIN ' . $this->_adapter->quoteName($join['table']);
-                $tmp .= ' ON (' . implode(' AND ', $this->_adapter->quoteName($join['condition'])) . ')'; 
+                $tmp .= ' ON ' . implode(' AND ', $this->_adapter->quoteName($join['condition']));
 
                 $joins[] = $tmp;
             }
@@ -412,7 +458,12 @@ class KDatabaseQuery extends KObject
 				
 				if(isset($where['constraint'])) 
 				{
-					$value = $this->_adapter->quoteValue($where['value']);
+					$value = $where['value'];
+					
+					//Only quote if the value is not a named placeholder
+					if(substr($value, 0, 1) != ':') {
+						$value = $this->_adapter->quoteValue($value);
+					} 
 					
 					if(in_array($where['constraint'], array('IN', 'NOT IN'))) {
         				$value = ' ( '.$value. ' ) ';
@@ -459,6 +510,20 @@ class KDatabaseQuery extends KObject
 
 		if (!empty($this->limit)) {
 			$query .= ' LIMIT '.$this->offset.' , '.$this->limit.PHP_EOL;
+		}
+		
+		//Perform named binding
+		preg_match_all("/:([a-zA-Z_][a-zA-Z0-9_]*)/m", $query, $matches);	
+		foreach($matches[1] as $key => $match)
+		{
+			// only attempt to bind if the data key exists.
+            // this allows for nulls and empty strings.
+            if (! array_key_exists($match, $this->_bind)) {
+                continue;
+            }
+			
+            $value = $this->_adapter->quoteValue($this->_bind[$match]);
+			$query = str_replace($matches[0][$key], $value, $query);
 		}
 
 		return $query;
