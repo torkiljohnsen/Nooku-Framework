@@ -408,7 +408,7 @@ class KDatabaseQuery extends KObject
 		{
 			$columns = array();
 			foreach($this->columns as $column) {
-				$columns[] = $this->_adapter->quoteName($column);
+				$columns[] = $this->_adapter->quoteIdentifier($column);
 			} 
 			
 			$query .= ' '.implode(' , ', $columns).PHP_EOL;
@@ -418,7 +418,7 @@ class KDatabaseQuery extends KObject
 		{
 			$tables = array();
 			foreach($this->from as $table) {
-				$tables[] = $this->_adapter->quoteName($table);
+				$tables[] = $this->_adapter->quoteIdentifier($table);
 			} 
 			
 			$query .= ' FROM '.implode(' , ', $tables).PHP_EOL;
@@ -435,8 +435,8 @@ class KDatabaseQuery extends KObject
                     $tmp .= $join['type'] . ' ';
                 }
 
-                $tmp .= 'JOIN ' . $this->_adapter->quoteName($join['table']);
-                $tmp .= ' ON ' . implode(' AND ', $this->_adapter->quoteName($join['condition']));
+                $tmp .= 'JOIN ' . $this->_adapter->quoteIdentifier($join['table']);
+                $tmp .= ' ON ' . implode(' AND ', $this->_adapter->quoteIdentifier($join['condition']));
 
                 $joins[] = $tmp;
             }
@@ -454,7 +454,7 @@ class KDatabaseQuery extends KObject
 					$query .= ' '.$where['condition'];		
 				}
 				
-				$query .= ' '. $this->_adapter->quoteName($where['property']);
+				$query .= ' '. $this->_adapter->quoteIdentifier($where['property']);
 				
 				if(isset($where['constraint'])) 
 				{
@@ -480,7 +480,7 @@ class KDatabaseQuery extends KObject
 		{
 			$columns = array();
 			foreach($this->group as $column) {
-				$columns[] = $this->_adapter->quoteName($column);
+				$columns[] = $this->_adapter->quoteIdentifier($column);
 			} 
 			
 			$query .= ' GROUP BY '.implode(' , ', $columns).PHP_EOL;
@@ -490,7 +490,7 @@ class KDatabaseQuery extends KObject
 		{
 			$columns = array();
 			foreach($this->having as $column) {
-				$columns[] = $this->_adapter->quoteName($column);
+				$columns[] = $this->_adapter->quoteIdentifier($column);
 			} 
 			
 			$query .= ' HAVING '.implode(' , ', $columns).PHP_EOL;
@@ -502,7 +502,7 @@ class KDatabaseQuery extends KObject
 
 			$list = array();
             foreach ($this->order as $order) {
-            	$list[] = $this->_adapter->quoteName($order['column']).' '.$order['direction'];
+            	$list[] = $this->_adapter->quoteIdentifier($order['column']).' '.$order['direction'];
             }
 
             $query .= implode(' , ', $list) . PHP_EOL;

@@ -24,7 +24,7 @@ class KDatabaseAdapterMysqli extends KDatabaseAdapterAbstract
 	 *
 	 * @var string
 	 */
-	protected $_name_quote = '`';
+	protected $_identifier_quote = '`';
 	
 	/**
  	 * Map of native MySQL types to generic types used when reading
@@ -350,7 +350,7 @@ class KDatabaseAdapterMysqli extends KDatabaseAdapterAbstract
 
 			if(!isset($this->_table_schema[$tblval]['columns']))
 			{
-				$columns = $this->fetchObjectList( 'SHOW FULL COLUMNS FROM ' . $this->quoteName($table));
+				$columns = $this->fetchObjectList( 'SHOW FULL COLUMNS FROM ' . $this->quoteIdentifier($table));
 				foreach ($columns as $column) 
 				{
 					//Set the table name in the raw info (MySQL doesn't add this)
@@ -434,7 +434,7 @@ class KDatabaseAdapterMysqli extends KDatabaseAdapterAbstract
 			
 			if(!isset($this->_table_schema[$tblval]['indexes']))
 			{
-				$indexes = $this->fetchObjectList('SHOW INDEX FROM ' . $this->quoteName($table));
+				$indexes = $this->fetchObjectList('SHOW INDEX FROM ' . $this->quoteIdentifier($table));
 				
 				foreach($indexes as $index) {
 					$this->_table_schema[$tblval]['indexes'][$index->Key_name][$index->Seq_in_index] = $index;

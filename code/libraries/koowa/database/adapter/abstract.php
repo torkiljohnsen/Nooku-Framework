@@ -63,11 +63,11 @@ abstract class KDatabaseAdapterAbstract extends KObject implements KDatabaseAdap
 	protected $_table_prefix = '';
 
 	/**
-	 * Quote for named objects
+	 * Quote for identifiers
 	 *
 	 * @var string
 	 */
-	protected $_name_quote = '`';
+	protected $_identifier_quote = '`';
 
 	/**
 	 * Constructor.
@@ -272,7 +272,7 @@ abstract class KDatabaseAdapterAbstract extends KObject implements KDatabaseAdap
 					$keys[] = '`'.$key.'`';
 				}
 
-				$sql = 'INSERT INTO '.$this->quoteName('#__'.$context->table )
+				$sql = 'INSERT INTO '.$this->quoteIdentifier('#__'.$context->table )
 					 . '('.implode(', ', $keys).') VALUES ('.implode(', ', $vals).')';
 				 
 				//Execute the query
@@ -317,7 +317,7 @@ abstract class KDatabaseAdapterAbstract extends KObject implements KDatabaseAdap
 				}
 				
 				//Create query statement
-				$sql = 'UPDATE '.$this->quoteName('#__'.$context->table)
+				$sql = 'UPDATE '.$this->quoteIdentifier('#__'.$context->table)
 			  		.' SET '.implode(', ', $vals)
 			  		.' '.$context->where
 				;
@@ -354,7 +354,7 @@ abstract class KDatabaseAdapterAbstract extends KObject implements KDatabaseAdap
 		if($this->getCommandChain()->run('database.before.delete', $context) ===  true)
 		{
 			//Create query statement
-			$sql = 'DELETE FROM '.$this->quoteName('#__'.$context->table)
+			$sql = 'DELETE FROM '.$this->quoteIdentifier('#__'.$context->table)
 				  .' '.$context->where
 			;
 
@@ -506,34 +506,34 @@ abstract class KDatabaseAdapterAbstract extends KObject implements KDatabaseAdap
     abstract public function _quoteValue($value);
 
    	/**
-     * Quotes a single identifier name (table, table alias, table column,
-     * index, sequence).  Ignores empty values.
+     * Quotes a single identifier (table, table alias, table column, index, sequence).  
+     * Ignores empty values.
      * 
      * This function requires all SQL statements, operators and functions to be 
      * uppercased.
      *
-     * @param string|array The identifier name to quote.  If an array, quotes 
+     * @param string|array The identifier to quote.  If an array, quotes 
      *                      each element in the array as an identifier name.
-     * @return string|array The quoted identifier name (or array of names).
+     * @return string|array The quoted identifier (or array of identifiers).
      *
-     * @see _quoteName()
+     * @see _quoteIdentifier()
      */
-    public function quoteName($spec)
+    public function quoteIdentifier($identifier)
     {
-    	if (is_array($spec))
+    	if (is_array($identifier))
         {
-            foreach ($spec as $key => $val) {
-                $spec[$key] = $this->quoteName($val);
+            foreach ($identifier as $key => $val) {
+                $identfier[$key] = $this->quoteIdentifier($val);
             }
             
-            return $spec;
+            return $identifier;
         }
          
         // String spaces around the identifier
-        $spec = trim($spec);
+        $identifier = trim($identifier);
     	
         // Quote all the lower case parts
-    	$spec = preg_replace_callback('#(?:\b|\#)+(?<!`)([a-z0-9\.\#\-_]+)(?!`)\b#', array($this, '_quoteName') , $spec);
+    	$identifier = preg_replace_callback('#(?:\b|\#)+(?<!`)([a-z0-9\.\#\-_]+)(?!`)\b#', array($this, '_quoteIdentifier') , $identifier);
     	
         return $spec;
     }
@@ -541,36 +541,36 @@ abstract class KDatabaseAdapterAbstract extends KObject implements KDatabaseAdap
     /**
      * Quotes an identifier name (table, index, etc). Ignores empty values.
      * 
-     * If the name contains a dot, this method will separately quote the
+     * If the identifier contains a dot, this method will separately quote the
      * parts before and after the dot.
      *
-     * @param string 	The identifier name to quote.
-     * @return string 	The quoted identifier name.
-     * @see quoteName()
+     * @param string 	The identifier to quote.
+     * @return string 	The quoted identifier.
+     * @see quoteIdentifier()
      */
-    protected function _quoteName($name)
+    protected function _quoteIdentifier($identifier)
     {
     	$result =  '';
     	
-    	if(is_array($name)) {
-    		$name = $name[0];
+    	if(is_array($identifier)) {
+    		$identifier = $identifier[0];
     	}
     	
-    	$name   = trim($name);
+    	$identifier = trim($identifier);
     	
         //Special cases
-        if ($name == '*' || is_numeric($name)) {
+        if ($identifier == '*' || is_numeric($identifier)) {
             return $name;
         }
          
-        if ($pos = strrpos($name, '.'))
+        if ($pos = strrpos($identifier, '.'))
         {
-            $table  = $this->_quoteName(substr($name, 0, $pos));
-            $column = $this->_quoteName(substr($name, $pos + 1));
+            $table  = $this->_quoteIdentifier(substr($identifier, 0, $pos));
+            $column = $this->_quoteIdentifier(substr($identifier, $pos + 1));
             		
             $result =  "$table.$column";
         }
-        else $result = $this->_name_quote. $name.$this->_name_quote;
+        else $result = $this->_identifier_quote. $identifier.$this->_identifier_quote;
         
         return $result;
     }

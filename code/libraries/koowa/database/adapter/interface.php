@@ -260,15 +260,15 @@ interface KDatabaseAdapterInterface
     public function quoteValue($value);
     
    	/**
-     * Quotes a single identifier name (table, table alias, table column,
-     * index, sequence).  Ignores empty values.
+     * Quotes a single identifier (table, table alias, table column, index, sequence).  
+     * Ignores empty values.
      * 
      * This function requires all SQL statements, operators and functions to be 
      * uppercased.
      *
-     * @param string|array The identifier name to quote.  If an array, quotes 
-     *                      each element in the array as an identifier name.
-     * @return string|array The quoted identifier name (or array of names).
+     * @param string|array The identifier to quote.  If an array, quotes 
+     *                      each element in the array as an identifier.
+     * @return string|array The quoted identifier (or array of identifiers).
      */
-    public function quoteName($spec);
+    public function quoteIdentifier($identifier);
 }
