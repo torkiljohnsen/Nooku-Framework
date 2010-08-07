@@ -369,7 +369,7 @@ class KDatabaseQuery extends KObject
         return $this;
     }
     
-	/*
+	/**
 	 * Callback for array_walk to prefix elements of array with given prefix
 	 *
 	 * @param string The data to be prefixed
