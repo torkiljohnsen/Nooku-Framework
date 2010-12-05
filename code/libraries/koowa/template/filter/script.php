@@ -85,13 +85,17 @@ class KTemplateFilterScript extends KTemplateFilterAbstract implements KTemplate
 	{
 		$attribs = KHelperArray::toString($attribs);
 		
+		if(!isset($attribs['type'])) {
+			$attribs['type'] = 'text/javascript';
+		}
+		
 		if(!$link) 
 		{
-			$html  = '<script type="text/javascript" '.$attribs.'>'."\n";
+			$html  = '<script '.$attribs.'>'."\n";
 			$html .= trim($script);
 			$html .= '</script>'."\n";
 		}
-		else $html = '<script type="text/javascript" src="'.$script.'" '.$attribs.'></script>'."\n";
+		else $html = '<script src="'.$script.'" '.$attribs.'></script>'."\n";
 		
 		return $html;
 	}

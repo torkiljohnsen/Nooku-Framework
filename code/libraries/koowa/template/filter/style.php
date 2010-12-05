@@ -85,13 +85,21 @@ class KTemplateFilterStyle extends KTemplateFilterAbstract implements KTemplateF
 	{
 		$attribs = KHelperArray::toString($attribs);
 		
+		if(!isset($attribs['type'])) {
+			$attribs['type'] = 'text/css';
+		}
+		
+		if(!isset($attribs['rel'])) {
+			$attribs['rel'] = 'stylesheet';
+		}
+		
 		if(!$link) 
 		{
-			$html  = '<style type="text/css" '.$attribs.'>'."\n";
+			$html  = '<style '.$attribs.'>'."\n";
 			$html .= trim($style['data']);
 			$html .= '</style>'."\n";
 		}
-		else $html = '<link type="text/css" rel="stylesheet" href="'.$style.'" '.$attribs.' />'."\n";
+		else $html = '<link href="'.$style.'" '.$attribs.' />'."\n";
 		
 		return $html;
 	}

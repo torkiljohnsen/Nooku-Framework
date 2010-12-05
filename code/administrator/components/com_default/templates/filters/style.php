@@ -36,10 +36,24 @@ class ComDefaultTemplateFilterStyle extends KTemplateFilterStyle
 		
 		$document = KFactory::get('lib.joomla.document');
 			
-		if($link) {
-			$document->addStyleSheet($style, 'text/css', null, $attribs);
-		} else {
-			$document->addStyleDeclaration($style);
-		}
+		if($link) 
+		{
+			$type = 'text/css';
+			if(isset($attribs['type']))
+			{ 
+				$type = $attribs['type'];
+				unset($attribs['type']);
+			}
+			
+			$media = null;
+			if(isset($attribs['media']))
+			{ 
+				$media = $attribs['media'];
+				unset($attribs['media']);
+			}
+			
+			$document->addStyleSheet($style, $type, $media, $attribs);
+		} 
+		else $document->addStyleDeclaration($style);
 	}
 }

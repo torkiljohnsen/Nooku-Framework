@@ -35,10 +35,17 @@ class ComDefaultTemplateFilterScript extends KTemplateFilterScript
 		
 		$document = KFactory::get('lib.joomla.document');
 		
-		if($link) {
-			$document->addScript($script, 'text/javascript');
-		} else {
-			$document->addScriptDeclaration($script);
-		}
+		if($link) 
+		{	
+			$type = 'text/javascript';
+			if(isset($attribs['type']))
+			{ 
+				$type = $attribs['type'];
+				unset($attribs['type']);
+			}
+			
+			$document->addScript($script, $type);
+		} 
+		else $document->addScriptDeclaration($script);
 	}
 }
