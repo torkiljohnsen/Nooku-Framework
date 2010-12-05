@@ -3,15 +3,15 @@
  * @version		$Id$
  * @category	Koowa
  * @package     Koowa_Database
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
  * Database Namespace class
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Database
  */
@@ -24,6 +24,7 @@ class KDatabase
 	const OPERATION_INSERT = 2;
 	const OPERATION_UPDATE = 4;
 	const OPERATION_DELETE = 8;
+	const OPERATION_SHOW   = 16;
 
 	/**
 	 * Database result mode
@@ -34,15 +35,23 @@ class KDatabase
 	/**
 	 * Database fetch mode
 	 */
-	const FETCH_ROWSET  = 0;
-	const FETCH_ROW     = 1;
-	const FETCH_FIELD   = 2;
+	const FETCH_ROW         = 0;
+	const FETCH_ROWSET      = 1;
+
+	const FETCH_ARRAY       = 0;
+	const FETCH_ARRAY_LIST  = 1;
+	const FETCH_FIELD       = 2;
+	const FETCH_FIELD_LIST  = 3;
+	const FETCH_OBJECT      = 4;
+	const FETCH_OBJECT_LIST = 5;
 	
 	/**
 	 * Row states
 	 */
+	const STATUS_LOADED   = 'loaded';
 	const STATUS_DELETED  = 'deleted';
     const STATUS_INSERTED = 'inserted';
     const STATUS_UPDATED  = 'updated';
+    const STATUS_FAILED   = 'failed';
 	
 }

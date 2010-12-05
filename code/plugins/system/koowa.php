@@ -1,21 +1,24 @@
 <?php
 /**
  * @version     $Id$
- * @category	Koowa
- * @package     Koowa_Plugins
+ * @category	Nooku
+ * @package     Nooku_Plugins
  * @subpackage  System
- * @copyright   Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license     GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link        http://www.koowa.org
+ * @copyright   Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link        http://www.nooku.org
  */
 
 /**
  * Koowa System plugin
- *
- * @author		Mathias Verraes <mathias@koowa.org>
- * @category	Koowa
- * @package		Koowa
+.*
+ * @author		Johan Janssens <johan@nooku.org>
+ * @category	Nooku
+ * @package     Nooku_Plugings
+ * @subpackage  System
  */
+defined( '_JEXEC' ) or die( 'Restricted access' );
+
 class plgSystemKoowa extends JPlugin
 {
 	public function __construct($subject, $config = array())
@@ -54,14 +57,18 @@ class plgSystemKoowa extends JPlugin
 		KFactory::addAdapter(new KFactoryAdapterPlugin());
 		KFactory::addAdapter(new KFactoryAdapterComponent());
 		
-		// Decorate the application object
-		$app  =& JFactory::getApplication();
-		$app  = new KDecoratorJoomlaApplication($app);
+		//Set the root path for the request based on the application name
+        KRequest::root(str_replace('/'.JFactory::getApplication()->getName(), '', KRequest::base()));
 		
 		//Create the koowa database object
-		$db  = KFactory::get('lib.koowa.database.adapter.mysqli')
-			->setConnection(JFactory::getDBO()->_resource)
-			->setTablePrefix(JFactory::getDBO()->_table_prefix);
+		$dbo = JFactory::getDBO();
+		
+		$resource = method_exists($dbo, 'getConnection') ? $dbo->getConnection() : $dbo->_resource;
+		$prefix   = method_exists($dbo, 'getPrefix')     ? $dbo->getPrefix()     : $dbo->_table_prefix;
+		
+		$db	= KFactory::get('lib.koowa.database.adapter.mysqli')
+				->setConnection($resource)
+				->setTablePrefix($prefix);
 		
         //Set factory identifier aliasses
         KFactory::map('lib.koowa.database'   , $db);
@@ -91,29 +98,6 @@ class plgSystemKoowa extends JPlugin
 		parent::__construct($subject, $config = array());
 	}
 	
-	/**
-	 * Prettify the output using Tidy filter (if available) and debug has been
-	 * enabled
-	 *
-	 * @return void
-	 */
-	public function onAfterRender()
-	{
-		/*if(KDEBUG)
-		{
-			$config =  array(
-					'indent'            => true,
-                	'indent-attributes' => true,
-                	'wrap'              => 120,
-			);
-	
-			$filter = new KFilterTidy(array('config' => $config));
-			$result = $filter->sanitize(JResponse::getBody());
-		
-			JResponse::setBody($result);
-		}*/
-	}
-	
  	/**
 	 * Catch all exception handler
 	 *
@@ -128,7 +112,7 @@ class plgSystemKoowa extends JPlugin
 		
 		//Change the Joomla error handler to our own local handler and call it
 		JError::setErrorHandling( E_ERROR, 'callback', array($this,'errorHandler'));
-		JError::raiseError('500', $exception->getMessage());
+		JError::raiseError($exception->getCode(), $exception->getMessage());
 	}
 
 	/**
@@ -142,15 +126,20 @@ class plgSystemKoowa extends JPlugin
 	 */
 	public function errorHandler($error)
 	{
-		$error->backtrace = $this->_exception->getTrace();
-		$error->file      = $this->_exception->getFile();
-		$error->line      = $this->_exception->getLine();
+		$error->setProperties(array(
+			'backtrace'	=> $this->_exception->getTrace(),
+			'file'		=> $this->_exception->getFile(),
+			'line'		=> $this->_exception->getLine()
+		));
 		
 		if(KFactory::get('lib.joomla.config')->getValue('config.debug')) {
-			$error->message   = $this->_exception;
+			$error->set('message', (string) $this->_exception);
 		} else {
-			$error->message   = '';
+			$error->set('message', $this->_exception->getMessage());
 		}
+		
+		//Make sure the buffers are cleared
+		while(@ob_get_clean());
 		
 		JError::customErrorPage($error);
 	}

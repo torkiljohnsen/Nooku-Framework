@@ -3,9 +3,9 @@
  * @version		$Id$
  * @category	Koowa
  * @package		Koowa_Controller
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
@@ -13,7 +13,7 @@
  *
  * Note: Concrete controllers must have a singular name
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package		Koowa_Controller
  * @uses		KMixinClass
@@ -36,7 +36,13 @@ abstract class KControllerAbstract extends KObject implements KObjectIdentifiabl
 	 * @var	string
 	 */
 	protected $_action;
-
+	
+	/**
+	 * The class actions
+	 *
+	 * @var	array
+	 */
+	protected $_actions;
 
 	/**
 	 * Constructor.
@@ -52,16 +58,9 @@ abstract class KControllerAbstract extends KObject implements KObjectIdentifiabl
         
 		//Set the action
 		$this->_action = $config->action;
-
+		
         // Mixin the command chain
-        $this->mixin(new KMixinCommandchain(new KConfig(
-        	array('mixer' => $this, 'command_chain' => $config->command_chain, 'auto_events' => $config->auto_events)
-        )));
-
-        //Mixin a filter
-        $this->mixin(new KMixinCommand(new KConfig(
-        	array('mixer' => $this, 'command_chain' => $this->getCommandChain())
-        )));
+        $this->mixin(new KMixinCommandchain($config->append(array('mixer' => $this))));
 	}
 
 
@@ -76,9 +75,10 @@ abstract class KControllerAbstract extends KObject implements KObjectIdentifiabl
     protected function _initialize(KConfig $config)
     {
     	$config->append(array(
-            'command_chain' =>  new KCommandChain(),
-    		'action'		=> null,
-    		'auto_events'	=> true
+            'command_chain'     =>  new KCommandChain(),
+    		'action'		    => null,
+    		'dispatch_events'   => true,
+    		'enable_callbacks' 	=> true
         ));
         
         parent::_initialize($config);
@@ -110,36 +110,36 @@ abstract class KControllerAbstract extends KObject implements KObjectIdentifiabl
 		//Set the original action in the controller to allow it to be retrieved
 		$this->setAction($action);
 
+		//Create the command context object
+		if(!($data instanceof KCommandContext))
+		{
+			$context = $this->getCommandContext();
+			$context->data   = $data;
+			$context->result = false;
+		} 
+		else $context = clone $data;
+		
+		//Set the action
+		$context->action = $action;
+		
 		//Find the mapped action if one exists
 		if (isset( $this->_action_map[$action] )) {
-			$action = $this->_action_map[$action];
+			$command = $this->_action_map[$action];
+		} else {
+			$command = $action;
 		}
 		
-		//Create the command arguments object
-		$context = $this->getCommandChain()->getContext();
-		$context->caller = $this;
-		$context->action = $action;
-		$context->data   = $data;
-		$context->result = false;
-		
-		if($this->getCommandChain()->run('controller.before.'.$action, $context) === true) 
+		if($this->getCommandChain()->run('before.'.$command, $context) !== false) 
 		{
 			$action = $context->action;
-			$method = '_action'.ucfirst($action);
+			$method = '_action'.ucfirst($command);
 	
 			if (!in_array($method, $this->getMethods())) {
 				throw new KControllerException("Can't execute '$action', method: '$method' does not exist");
 			}
-			
-			//Transfrom the data to pass it to the action method
-			if(is_array($data) && $context->data instanceof KConfig) {
-				$data = $context->data->toArray();
-			} else {
-				$data = $context->data;
-			}
-			
-			$context->result = $this->$method($data);
-			$this->getCommandChain()->run('controller.after.'.$action, $context);
+				
+			$context->result = $this->$method($context);
+			$this->getCommandChain()->run('after.'.$command, $context);
 		}
 
 		return $context->result;
@@ -152,16 +152,21 @@ abstract class KControllerAbstract extends KObject implements KObjectIdentifiabl
 	 */
 	public function getActions()
 	{
-		$result = array();
-		foreach(get_class_methods($this) as $action)
+		if(!$this->_actions)
 		{
-			if(substr($action, 0, 7) == '_action') {
-				$result[] = strtolower(substr($action, 7));
-			}
+			$this->_actions = array();
 			
-			$result = array_unique(array_merge($result, array_keys($this->_action_map)));
+			foreach($this->getMethods() as $action)
+			{
+				if(substr($action, 0, 7) == '_action') {
+					$this->_actions[] = strtolower(substr($action, 7));
+				}
+			
+				$this->_actions = array_unique(array_merge($this->_actions, array_keys($this->_action_map)));
+			}
 		}
-		return $result;
+		
+		return $this->_actions;
 	}
 
 	/**
@@ -174,17 +179,24 @@ abstract class KControllerAbstract extends KObject implements KObjectIdentifiabl
 		return $this->_action;
 	}
 
-	/**
-	 * Set the action that will be performed.
-	 *
-	 * @param	string Action name
-	 * @return  KControllerAbstract
-	 */
-	public function setAction($action)
-	{
-		$this->_action = $action;
-		return $this;
-	}
+	/** 
+   	 * Set the action that will be performed. 
+     * 
+     * @param       string Action name 
+     * @return  KControllerAbstract 
+     */ 
+  	public function setAction($action) 
+   	{ 
+    	$action = strtolower($action);
+   		
+   		//Find the mapped action if one exists 
+      	if (isset( $this->_action_map[$action] )) { 
+           	$action = $this->_action_map[$action]; 
+       	} 
+        
+       	$this->_action = $action; 
+      	return $this; 
+   	} 
 
 	/**
 	 * Register (map) an action to a method in the class.

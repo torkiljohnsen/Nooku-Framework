@@ -1,13 +1,22 @@
 <?php
 /**
-* @version		$Id$
-* @category		Koowa
-* @package      Koowa_Modules
-* @copyright    Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
-* @license      GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-* @link         http://www.koowa.org
-*/
+ * @version     $Id$
+ * @category	Nooku
+ * @package     Nooku_Modules
+ * @subpackage  Default
+ * @copyright   Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link        http://www.nooku.org
+ */
 
+/**
+ * Default Module View
+.*
+ * @author		Johan Janssens <johan@nooku.org>
+ * @category	Nooku
+ * @package     Nooku_Modules
+ * @subpackage  Default
+ */
 class ModDefaultHtml extends KViewHtml
 {
 	/**
@@ -27,7 +36,7 @@ class ModDefaultHtml extends KViewHtml
         $template = KFactory::get('lib.koowa.application')->getTemplate();
         $path     = JPATH_THEMES.DS.$template.DS.'html'.DS.'mod_'.$this->_identifier->package;
           
-         KFactory::get($this->getTemplate())->addPath($path);
+         $this->getTemplate()->addPath($path);
 	}
 	
 	/**
@@ -61,7 +70,7 @@ class ModDefaultHtml extends KViewHtml
 			$identifier	= clone $this->_identifier;
 			$identifier->name	= 'model';
 			
-			$this->_model = $identifier;
+			$this->_model = KFactory::get($identifier);
 		}
        	
 		return $this->_model;
@@ -79,7 +88,7 @@ class ModDefaultHtml extends KViewHtml
 			$identifier	= clone $this->_identifier;
 			$identifier->name	= 'template';
 			
-			$this->_template = $identifier;
+			$this->_template = KFactory::get($identifier);
 		}
 		
 		return $this->_template;
@@ -92,30 +101,11 @@ class ModDefaultHtml extends KViewHtml
 	 */
 	public function display()
 	{
-		//Render the template
-		$template = $this->loadTemplate();
-		
-		$document = KFactory::get('lib.joomla.document');
-		
-		foreach($this->getStyles() as $style) 
-		{
-			if($style['link']) {
-				$document->addStyleSheet($style['data'], 'text/css', null, $style['attribs']);
-			} else {
-				$document->addStyleDeclaration($style['data']);
-			}
-		}
-			
-		foreach($this->getScripts() as $script) 
-		{
-			if($script['link']) {
-				$document->addScript($script['data'], 'text/javascript');
-			} else {
-				$document->addScriptDeclaration($script['data']);
-			}
-		}
-		
-		echo $template;
+		$this->output = $this->getTemplate()
+				->loadIdentifier($this->_layout, $this->_data)
+				->render(true);
+				
+		echo $this->output;
 		return $this;
 	}
 }

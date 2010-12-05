@@ -4,14 +4,14 @@
  * @category	Koowa
  * @package		Koowa_Database
  * @subpackage 	Behavior
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
  * Abstract Template Filter
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Template
  * @subpackage 	Filter
@@ -55,7 +55,7 @@ abstract class KTemplateFilterAbstract extends KObject implements KTemplateFilte
 	protected function _initialize(KConfig $config)
     {
     	$config->append(array(
-			'priority'   => KCommandChain::PRIORITY_NORMAL,
+			'priority'   => KCommand::PRIORITY_NORMAL,
 	  	));
 
     	parent::_initialize($config);
@@ -97,11 +97,11 @@ abstract class KTemplateFilterAbstract extends KObject implements KTemplateFilte
 		//Set the data
 		$data = $context->data;
 
-		if($name == KTemplateFilter::MODE_READ && $this instanceof KTemplateFilterRead) {
+		if(($name & KTemplateFilter::MODE_READ) && $this instanceof KTemplateFilterRead) {
 			$this->read($data);
 		}
 
-		if($name == KTemplateFilter::MODE_WRITE && $this instanceof KTemplateFilterWrite) {
+		if(($name & KTemplateFilter::MODE_WRITE) && $this instanceof KTemplateFilterWrite) {
 			$this->write($data);
 		} 
 		

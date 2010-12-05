@@ -3,15 +3,15 @@
 * @version		$Id$
 * @category		Koowa
 * @package      Koowa_Filter
-* @copyright    Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
-* @license      GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-* @link 		http://www.koowa.org
+* @copyright    Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+* @license      GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+* @link 		http://www.nooku.org
 */
 
 /**
  * Abstract filter.
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Filter
  */
@@ -148,9 +148,9 @@ abstract class KFilterAbstract implements KFilterInterface
 	 *
 	 * @return this
 	 */
-	public function addFilter(KFilterInterface $filter, $priority = KCommandChain::PRIORITY_NORMAL)
+	public function addFilter(KFilterInterface $filter)
 	{	
-		$this->_chain->enqueue($filter, $priority);
+		$this->_chain->enqueue($filter, $filter->getPriority());
 		return $this;
 	}
 	
@@ -166,6 +166,16 @@ abstract class KFilterAbstract implements KFilterInterface
 	{
 		return spl_object_hash( $this );
 	}
+	
+	/**
+	 * Get the priority of the filter
+	 *
+	 * @return	integer The command priority
+	 */
+  	public function getPriority()
+  	{
+  		return KCommand::PRIORITY_NORMAL;
+  	}
 
 	/**
 	 * Validate a variable

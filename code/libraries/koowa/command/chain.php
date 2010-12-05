@@ -3,9 +3,9 @@
  * @version		$Id$
  * @category	Koowa
  * @package		Koowa_Command
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
@@ -15,21 +15,12 @@
  * as the key. Each command can have a priority, default priority is 3 The queue 
  * is ordered by priority, commands with a higher priority are called first.
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Command
  */
 class KCommandChain extends KObject
 {
-	/**
-	 * Priority levels
-	 */
-	const PRIORITY_HIGHEST = 1;
-	const PRIORITY_HIGH    = 2;
-	const PRIORITY_NORMAL  = 3;
-	const PRIORITY_LOW     = 4;
-	const PRIORITY_LOWEST  = 5;
-	
 	/**
 	 * Command list
 	 *
@@ -50,6 +41,21 @@ class KCommandChain extends KObject
 	 * @var boolean
 	 */
 	protected $_enabled = true;
+	
+	/**
+	 * The chain's break condition
+	 * 
+	 * @see run()
+	 * @var boolean
+	 */
+	protected $_break_condition = false;
+	
+	/**
+	 * The command context object
+	 * 
+	 * @var KCommandContext
+	 */
+	protected $_context = null;
 
 	/**
 	 * Constructor
@@ -58,18 +64,47 @@ class KCommandChain extends KObject
 	 */
 	public function __construct(KConfig $config = null)
 	{
+		 //If no config is passed create it
+		if(!isset($config)) $config = new KConfig();
+		
+		parent::__construct($config);
+		
+		$this->_break_condition = (boolean) $config->break_condition;
+		$this->_enabled         = (boolean) $config->enabled;
+		$this->_context         = $config->context;
+		
 		$this->_command  = new ArrayObject();
 		$this->_priority = new ArrayObject();
+
 	}
+	
+    /**
+     * Initializes the default configuration for the object
+     *
+     * Called from {@link __construct()} as a first step of object instantiation.
+     *
+     * @param 	object 	An optional KConfig object with configuration options.
+     * @return void
+     */
+    protected function _initialize(KConfig $config)
+    {
+    	$config->append(array(
+    		'context'		  =>  new KCommandContext(),
+    		'enabled'		  =>  true,
+            'break_condition' =>  false,
+        ));
+        
+        parent::_initialize($config);
+    }
 	
   	/**
 	 * Attach a command to the chain
 	 * 
-	 * @param 	object 		A KCommandHandler 
+	 * @param 	object 		A KCommand object
 	 * @param 	integer		The command priority, usually between 1 (high priority) and 5 (lowest), default is 3
 	 * @return	 KCommandChain
 	 */
-	public function enqueue( KCommandInterface $cmd, $priority = self::PRIORITY_NORMAL)
+	public function enqueue( KCommandInterface $cmd, $priority = KCommand::PRIORITY_NORMAL)
 	{
 		if($handle = $cmd->getHandle()) 
 		{
@@ -85,7 +120,7 @@ class KCommandChain extends KObject
 	/**
 	 * Remove a command from the chain
 	 * 
-	 * @param 	object 		A KCommandHandler 
+	 * @param 	object 		A KCommand object
 	 * @param 	integer		The command priority
 	 * @return 	KCommandChain
 	 */
@@ -93,8 +128,10 @@ class KCommandChain extends KObject
 	{
 		if($handle = $cmd->getHandle())
 		{
-			if($this->_command->offsetExist($handle)) {
-				$this->_command->offsetUnset($handle);	
+			if($this->_command->offsetExists($handle)) 
+			{
+				$this->_command->offsetUnset($handle);
+				$this->_priority->offsetUnSet($handle);	
 			}
 		}
 
@@ -104,11 +141,11 @@ class KCommandChain extends KObject
   	/**
 	 * Run the commands in the chain
 	 * 
-	 * If a command return false the executing is halted
+	 * If a command returns the 'break condition' the executing is halted.
 	 * 
 	 * @param 	string  The command name
 	 * @param 	mixed   The command context
-	 * @return	boolean True if successfull, otherwise false
+	 * @return  void|boolean	If the chain is broken, returns the break condition. Default returns void.
 	 */
   	public function run( $name, KCommandContext $context )
   	{
@@ -116,22 +153,17 @@ class KCommandChain extends KObject
   		{
   			$iterator = $this->_priority->getIterator();
   			
-  			//Store a reference to the active context
-  			$this->_context = $context;
-  		
 			while($iterator->valid()) 
 			{
     			$cmd = $this->_command[ $iterator->key()];
     		
-				if ( $cmd->execute( $name, $context ) === false) {
-      				return false;
+    			if ( $cmd->execute( $name, $context ) === $this->_break_condition) {
+      				return $this->_break_condition;
       			}
 
     			$iterator->next();
 			}
   		}
-		
-		return true;
   	}
   	
   	/**
@@ -161,7 +193,7 @@ class KCommandChain extends KObject
   	/**
 	 * Set the priority of a command
 	 * 
-	 * @param object 	A KCommandHandler 
+	 * @param object 	A KCommand object 
 	 * @param integer	The command priority
 	 * @return KCommandChain
 	 */
@@ -180,7 +212,7 @@ class KCommandChain extends KObject
   	/**
 	 * Get the priority of a command
 	 * 
-	 * @param object 	A KCommandHandler 
+	 * @param object 	A KCommand object
 	 * @param integer	The command priority
 	 * @return	integer The command priority
 	 */
@@ -203,8 +235,7 @@ class KCommandChain extends KObject
 	 * @return	KCommandContext
 	 */
   	public function getContext()
-  	{
-		$context = new KCommandContext();	
-  		return $context;
+  	{	
+  		return clone $this->_context;
   	}
 }

@@ -3,9 +3,9 @@
  * @version		$Id$
  * @category	Koowa
  * @package		Koowa_Template
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
  /**
@@ -14,7 +14,7 @@
   * Based in large part on the example at
   * http://www.php.net/manual/en/function.stream-wrapper-register.php
   * 
-  * @author		Johan Janssens <johan@koowa.org>
+  * @author		Johan Janssens <johan@nooku.org>
   * @category	Koowa
   * @package	Koowa_Template
   */
@@ -51,6 +51,9 @@ class KTemplateStream
      	if (!in_array('tmpl', stream_get_wrappers())) {
          	stream_wrapper_register('tmpl', __CLASS__);
        	}
+       	
+       	//Set shutdown function to handle stream errors
+		register_shutdown_function(array(__CLASS__, 'stream_error')); 
     } 
 
  	/**
@@ -64,24 +67,15 @@ class KTemplateStream
      * @return boolean
      */
     public function stream_open($path) 
-	{   
-        //Get the view script source
+	{   	
+		//Get the view script source
         $path = str_replace('tmpl://', '', $path);
-        $this->_data = file_get_contents($path);
-        
-        //If reading the file failed, update our local stat store
-        //to reflect the real stat of the file, then return on failure
-        if ($this->_data === false) 
-        {
-            $this->_stat = stat($path);
-            return false;
-        }
-         
+            
   		//Get the template object from the template repository and filter 
-  		//the data before reading
-     	$this->_data = 	KFactory::get('lib.koowa.template.registry')
-     						->get($path)
-     						->filter($this->_data, KTemplateFilter::MODE_READ);
+  		//the data before reading					
+    	$this->_data = KFactory::get('lib.koowa.template.registry')
+    						->get($path)
+     						->filter(KTemplateFilter::MODE_READ);
      	
        // file_get_contents() won't update PHP's stat cache, so performing
        // another stat() on it will hit the filesystem again. Since the file
@@ -196,5 +190,39 @@ class KTemplateStream
             default:
                 return false;
         }
+    }
+    
+    /**
+     * Hanlde stream errors
+     * 
+     * Clean all output buffers and display the latest error
+     * 
+     * @return bool
+     */
+	public static function stream_error() 
+	{ 
+		if($error = error_get_last()) 
+		{
+			if($error['type'] === E_ERROR || $error['type'] === E_PARSE) 
+			{
+				while(@ob_get_clean());
+				echo '<strong>Fatal Error</strong>: '.$error['message'].' in <strong>'.$error['file'].'</strong> on line <strong>'.$error['line'].'</strong>';
+			}
+		}
+	}
+	
+	/**
+     * Url statistics.
+     *
+     * This method is called in response to all stat() related functions on the stream
+     * 
+     * @param 	string	The file path or URL to stat
+     * @param 	int		Holds additional flags set by the streams API
+     * 
+     * @return array
+     */
+    public function url_stat($path, $flags) 
+    {
+    	return $this->_stat;
     }
 }

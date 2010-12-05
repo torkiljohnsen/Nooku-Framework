@@ -4,15 +4,15 @@
 * @category		Koowa
 * @package      Koowa_Template
 * @subpackage	Filter
-* @copyright    Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
-* @license      GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-* @link 		http://www.koowa.org
+* @copyright    Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+* @license      GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+* @link 		http://www.nooku.org
 */
 
 /**
  * Template read filter for aliases such as @template, @text, @helper, @route etc
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Template
  * @subpackage	Filter
@@ -29,9 +29,9 @@ class KTemplateFilterAlias extends KTemplateFilterAbstract implements KTemplateF
 		'@date('    	=> '$this->loadHelper(\'date.format\',',
 		'@overlay('    	=> '$this->loadHelper(\'behavior.overlay\', ',
 		'@text('	 	=> 'JText::_(',
-		'@template('	=> 'KFactory::get($this->getView())->loadTemplate(',
-		'@route('    	=> 'KFactory::get($this->getView())->createRoute(',
-		'@escape('		=> 'KFactory::get($this->getView())->escape(',
+		'@template('	=> '$this->loadIdentifier(',
+		'@route('    	=> '$this->getView()->createRoute(',
+		'@escape('		=> '$this->getView()->escape(',
 	);
 	
 	/**
@@ -52,7 +52,7 @@ class KTemplateFilterAlias extends KTemplateFilterAbstract implements KTemplateF
 	protected function _initialize(KConfig $config)
     {
     	$config->append(array(
-			'priority'   => KCommandChain::PRIORITY_HIGH,
+			'priority'   => KCommand::PRIORITY_HIGH,
 	  	));
 
     	parent::_initialize($config);
@@ -66,11 +66,11 @@ class KTemplateFilterAlias extends KTemplateFilterAbstract implements KTemplateF
 	 */
 	public function append(array $alias, $mode = KTemplateFilter::MODE_READ)
 	{
-		if($mode == KTemplateFilter::MODE_READ) {
+		if($mode & KTemplateFilter::MODE_READ) {
 			$this->_alias_read = array_merge($this->_alias_read, $alias); 
 		}
 		
-		if($mode == KTemplateFilter::MODE_WRITE) {
+		if($mode & KTemplateFilter::MODE_WRITE) {
 			$this->_alias_write = array_merge($this->_alias_write, $alias); 
 		}
 		

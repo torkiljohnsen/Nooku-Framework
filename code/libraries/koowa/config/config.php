@@ -3,9 +3,9 @@
  * @version		$Id$
  * @category	Koowa
  * @package		Koowa_Config
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
@@ -13,7 +13,7 @@
  * 
  * KConfig provides a property based interface to an array
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package		Koowa_Config
  */
@@ -38,13 +38,8 @@ class KConfig implements IteratorAggregate, ArrayAccess, Countable
 		}
 		
 		$this->_data = array();
-		foreach ($config as $key => $value) 
-		{
-			if (is_array($value) && !is_numeric(key($config)) ) {
-                $this->_data[$key] = new self($value);
-            } else {
-                $this->_data[$key] = $value;
-            }
+		foreach ($config as $key => $value) {
+			$this->__set($key, $value);
         }
 	} 
 	
@@ -106,7 +101,7 @@ class KConfig implements IteratorAggregate, ArrayAccess, Countable
      */
     public function __set($name, $value)
     {
-    	if (is_array($value) && !empty($value) && !is_numeric(key($value))) {
+    	if (is_array($value)) {
          	$this->_data[$name] = new self($value);
       	} else {
          	$this->_data[$name] = $value;
@@ -245,30 +240,46 @@ class KConfig implements IteratorAggregate, ArrayAccess, Countable
         return $array;
     }
     
-	/**
-     * Merge an array. Only adding keys that don't exist.
+    /**
+     * Return the data 
      *
-     * @param  array 	An associative array of configuration elements to be appended
+     * If the data being passed is an instance of KConfig the data will be transformed
+     * to an associative array.
+     *
+     * @return array|scalar
+     */
+    public static function toData($data)
+    {
+    	return ($data instanceof KConfig) ? $data->toArray() : $data;
+    }
+    
+	/**
+     * Append values 
+     * 
+     * This funciton only adds keys that don't exist and it filters out any duplicate values
+     *
+     * @param  mixed 	A value of an or array of values to be appended
      * @return KConfig
      */
-    public function append(array $config)
+    public function append($config)
     {
-    	foreach($config as $key => $value) 
-        {
-        	if(array_key_exists($key, $this->_data)) 
-            {
-                if(is_array($value))
-                {
-               	 	if($this->_data[$key] instanceof KConfig) {
-                    	$this->_data[$key] = $this->_data[$key]->append($value);
-                	} else if (is_array($this->_data[$key])) {
-                    	$this->_data[$key] = array_merge($value, $this->_data[$key]);
-                    }
-                }
-            } 
-            else $this->$key = $value;
-        }
-        
+    	$config = (array) $config;
+    	
+    	if(!is_numeric(key($config))) 
+    	{
+    		foreach($config as $key => $value) 
+        	{
+        		if(array_key_exists($key, $this->_data)) 
+           		{
+               		if(!empty($value) && ($this->_data[$key] instanceof KConfig)) {
+               			$this->_data[$key] = $this->_data[$key]->append((array)$value);
+               		}
+           		} 
+           		else $this->__set($key, $value);
+        	}
+    	}
+    	else $this->_data = array_unique(array_merge($this->_data, $config));
+    	 
         return $this;
     } 
 }

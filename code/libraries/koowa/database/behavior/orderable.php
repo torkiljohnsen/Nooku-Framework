@@ -4,21 +4,20 @@
  * @category	Koowa
  * @package		Koowa_Database
  * @subpackage 	Behavior
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
  * Database Orderable Behavior
  *
- * @author		Mathias Verraes <mathias@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Database
  * @subpackage 	Behavior
  */
 class KDatabaseBehaviorOrderable extends KDatabaseBehaviorAbstract
 {
-
 	/**
 	 * Get the methods that are available for mixin based
 	 *
@@ -47,6 +46,7 @@ class KDatabaseBehaviorOrderable extends KDatabaseBehaviorAbstract
 	 */
 	public function _buildQueryWhere(KDatabaseQuery $query)
 	{
+		
 	}
 
 	/**
@@ -69,22 +69,29 @@ class KDatabaseBehaviorOrderable extends KDatabaseBehaviorAbstract
 			$new = $this->ordering + $change;
 			$new = $new <= 0 ? 1 : $new;
 
-			$query = KFactory::tmp('lib.koowa.database.query');
+			$table = $this->getTable();
+			$db    = $table->getDatabase();
+			$query = $db->getQuery();
+			
+			//Build the where query
 			$this->_buildQueryWhere($query);
 
-			$update =  'UPDATE `#__'.KFactory::get($this->getTable())->getBase().'` ';
-			if($change < 0) {
+			$update =  'UPDATE `#__'.$table->getBase().'` ';
+			if($change < 0) 
+			{
 				$update .= 'SET ordering = ordering+1 ';
 				$query->where('ordering', '>=', $new)
 					  ->where('ordering', '<', $old);
-			} else {
+			} 
+			else 
+			{
 				$update .= 'SET ordering = ordering-1 ';
 				$query->where('ordering', '>', $old)
 					  ->where('ordering', '<=', $new);
 			}
+			
 			$update .= (string) $query;
-
-			KFactory::get($this->getTable())->getDatabase()->execute($update);
+			$db->execute($update);
 
 			$this->ordering = $new;
 			$this->save();
@@ -101,16 +108,18 @@ class KDatabaseBehaviorOrderable extends KDatabaseBehaviorAbstract
 	 */
 	public function reorder()
 	{
-		$table	= KFactory::get($this->getTable());
+		$table	= $this->getTable();
 		$db 	= $table->getDatabase();
-		$query 	= KFactory::tmp('lib.koowa.database.query');
+		$query 	= $db->getQuery();
+		
+		//Build the where query
 		$this->_buildQueryWhere($query);
 
 		$db->execute("SET @order = 0");
 		$db->execute(
 			 'UPDATE #__'.$table->getBase().' '
 			.'SET ordering = (@order := @order + 1) '
-			.(string) $query
+			.(string) $query.' '
 			.'ORDER BY ordering ASC'
 		);
 
@@ -131,11 +140,17 @@ class KDatabaseBehaviorOrderable extends KDatabaseBehaviorAbstract
 
     	if(isset($row->ordering) && $row->ordering <= 0)
     	{
-        	$select = 'SELECT MAX(ordering) FROM `#__'.$context->table.'`';
-        	$query 	= KFactory::tmp('lib.koowa.database.query');
-			$this->_buildQueryWhere($query);
+        	$table	= $context->caller;
+			$db 	= $table->getDatabase();
+			$query 	= $db->getQuery();
+    		
+			//Build the where query
+			$this->_buildQueryWhere($query);;
+			
+    		$select = 'SELECT MAX(ordering) FROM `#__'.$context->table.'`';
 			$select .= (string) $query;
-    		$row->ordering = (int) $context->caller->getDatabase()->fetchField($select) + 1;
+    		
+			$row->ordering = (int) $db->select($select, KDatabase::FETCH_FIELD) + 1;
         }
     }
 

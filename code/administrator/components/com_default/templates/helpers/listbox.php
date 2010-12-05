@@ -1,24 +1,25 @@
 <?php
 /**
  * @version     $Id$
- * @category	Koowa
- * @package     Koowa_Components
+ * @category	Nooku
+ * @package     Nooku_Components
  * @subpackage  Default
- * @copyright   Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license     GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link        http://www.koowa.org
+ * @copyright   Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link        http://www.nooku.org
  */
 
 /**
- * Default Paginator Helper
+ * Editor Helper
 .*
- * @author		Johan Janssens <johan@koowa.org>
- * @category	Koowa
- * @package     Koowa_Components
+ * @author		Johan Janssens <johan@nooku.org>
+ * @category	Nooku
+ * @package     Nooku_Components
  * @subpackage  Default
+ * @uses		KFactory
+ * @uses		KConfig
  */
-
-class ComDefaultHelperListbox extends KTemplateHelperListbox
+class ComDefaultTemplateHelperListbox extends KTemplateHelperListbox
 {
 	/**
 	 * Generates an HTML enabled optionlist
@@ -31,9 +32,10 @@ class ComDefaultHelperListbox extends KTemplateHelperListbox
 		$config = new KConfig($config);
 		$config->append(array(
 			'name'		=> 'enabled',
-			'state' 	=> null,
 			'attribs'	=> array(),
 			'deselect'	=> true
+		))->append(array(
+			'selected'  => $config->{$config->name}
 		));
 		
 		$options = array();
@@ -44,15 +46,11 @@ class ComDefaultHelperListbox extends KTemplateHelperListbox
 		
 		$options[] = $this->option(array('text' => JText::_( 'Enabled' ) , 'value' => 1 ));
 		$options[] = $this->option(array('text' => JText::_( 'Disabled' ), 'value' => 0 ));
-
-		$list = $this->optionlist(array(
-			'options' 	=> $options, 
-			'name' 		=> $config->name, 
-			'attribs' 	=> $config->attribs, 
-			'selected' 	=> $config->state->{$config->name},
-		));
+	
+		//Add the options to the config object
+		$config->options = $options;
 		
-		return $list;
+		return $this->optionlist($config);
 	}
 	
 	/**
@@ -66,9 +64,10 @@ class ComDefaultHelperListbox extends KTemplateHelperListbox
 		$config = new KConfig($config);
 		$config->append(array(
 			'name'		=> 'enabled',
-			'state' 	=> null,
 			'attribs'	=> array(),
 			'deselect'	=> true
+		))->append(array(
+			'selected'  => $config->{$config->name}
 		));
 		
 		$options = array();
@@ -80,14 +79,10 @@ class ComDefaultHelperListbox extends KTemplateHelperListbox
 		$options[] = $this->option(array('text' => JText::_( 'Published' ) , 'value' => 1 ));
 		$options[] = $this->option(array('text' => JText::_( 'Draft' ), 'value' => 0 ));
 
-		$list = $this->optionlist(array(
-			'options' 	=> $options, 
-			'name' 		=> $config->name, 
-			'attribs' 	=> $config->attribs, 
-			'selected' 	=> $config->state->{$config->name},
-		));
+		//Add the options to the config object
+		$config->options = $options;
 		
-		return $list;
+		return $this->optionlist($config);
 	}
 	
 	/**
@@ -101,12 +96,13 @@ class ComDefaultHelperListbox extends KTemplateHelperListbox
 		$config = new KConfig($config);
 		$config->append(array(
 			'name'		=> 'access',
-			'state' 	=> null,
 			'attribs'	=> array(),
 			'deselect'	=> true
+		))->append(array(
+			'selected'  => $config->{$config->name}
 		));
 		
- 		$options   = array();
+ 		$options  = array();
  		
  		if($config->deselect) {
 			$options[] =  $this->option(array('text' => '- '.JText::_( 'Select' ).' -'));
@@ -116,13 +112,9 @@ class ComDefaultHelperListbox extends KTemplateHelperListbox
 		$options[] = $this->option(array('text' => JText::_( 'Registered' ), 'value' => '1' ));
 		$options[] = $this->option(array('text' => JText::_( 'Special' ), 'value' => '2' ));
 
-		$list = $this->optionlist(array(
-			'options' 	=> $options, 
-			'name' 		=> $config->name, 
-			'attribs' 	=> $config->attribs, 
-			'selected' 	=> $config->state->{$config->name},
-		));
+		//Add the options to the config object
+		$config->options = $options;
 		
-		return $list;
+		return $this->optionlist($config);
  	}
 }

@@ -3,15 +3,15 @@
  * @version		$Id$
  * @category	Koowa
  * @package		Koowa_View
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
  * Abstract View Class
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package		Koowa_View
  * @uses		KMixinClass
@@ -130,7 +130,7 @@ abstract class KViewAbstract extends KObject implements KObjectIdentifiable
 			$identifier->name	= KInflector::isPlural($name) ? $name : KInflector::pluralize($name);
 			$identifier->path	= array('model');
 			
-			$this->_model = $identifier;
+			$this->_model = KFactory::get($identifier);
 		}
        	
 		return $this->_model;
@@ -146,13 +146,18 @@ abstract class KViewAbstract extends KObject implements KObjectIdentifiable
 	 */
 	public function setModel($model)
 	{
-		$identifier = KFactory::identify($model);
+		if(!($model instanceof $model))
+		{
+			$identifier = KFactory::identify($model);
+			
+			if($identifier->path[0] != 'model') {
+				throw new KViewException('Identifier: '.$identifier.' is not a model identifier');
+			}
 		
-		if($identifier->path[0] != 'model') {
-			throw new KViewException('Identifier: '.$identifier.' is not a model identifier');
+			$model = KFactory::get($identifier);
 		}
 		
-		$this->_model = $identifier;
+		$this->_model = $model;
 		return $this;
 	}
 

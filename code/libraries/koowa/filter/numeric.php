@@ -3,15 +3,15 @@
 * @version		$Id$
 * @category		Koowa
 * @package      Koowa_Filter
-* @copyright    Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
-* @license      GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-* @link 		http://www.koowa.org
+* @copyright    Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+* @license      GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+* @link 		http://www.nooku.org
 */
 
 /**
  * Numeric filter
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Filter
  */
@@ -40,7 +40,7 @@ class KFilterNumeric extends KFilterAbstract
 	protected function _sanitize($value)
 	{
 		return (string) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, 
-			FILTER_FLAG_ALLOW_FRACTION & FILTER_FLAG_ALLOW_THOUSAND & FILTER_FLAG_ALLOW_SCIENTIFIC);
+			FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND | FILTER_FLAG_ALLOW_SCIENTIFIC);
 	}
 }
 

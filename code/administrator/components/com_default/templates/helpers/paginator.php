@@ -1,23 +1,25 @@
 <?php
 /**
- * @version     $Id: koowa.php 1296 2009-10-24 00:15:45Z johan $
- * @category	Koowa
- * @package     Koowa_Components
+ * @version     $Id: default.php 2721 2010-10-27 00:58:51Z johanjanssens $
+ * @category	Nooku
+ * @package     Nooku_Components
  * @subpackage  Default
- * @copyright   Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license     GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link        http://www.koowa.org
+ * @copyright   Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link        http://www.nooku.org
  */
 
 /**
  * Default Paginator Helper
 .*
- * @author		Johan Janssens <johan@koowa.org>
- * @category	Koowa
- * @package     Koowa_Components
+ * @author		Johan Janssens <johan@nooku.org>
+ * @category	Nooku
+ * @package     Nooku_Components
  * @subpackage  Default
+ * @uses		KRequest
+ * @uses		KConfig
  */
-class ComDefaultHelperPaginator extends KTemplateHelperPaginator
+class ComDefaultTemplateHelperPaginator extends KTemplateHelperPaginator
 {
 	/**
 	 * Render item pagination
@@ -31,15 +33,17 @@ class ComDefaultHelperPaginator extends KTemplateHelperPaginator
 		$config = new KConfig($config);
 		$config->append(array(
 			'total'   => 0,
-			'state'   => null,
-			'display' => 4
+			'display' => 4,
+			'offset'  => 0,
+			'limit'	  => 0,
+			'attribs' => array('attribs' => array('onchange' => 'this.form.submit();'))
 		));
 		
 		// Paginator object
 		$paginator = KFactory::tmp('lib.koowa.model.paginator')->setData(
 				array('total'  => $config->total,
-					  'offset' => $config->state->offset,
-					  'limit'  => $config->state->limit,
+					  'offset' => $config->offset,
+					  'limit'  => $config->limit,
 					  'display' => $config->display)
 		);
 				
@@ -85,6 +89,26 @@ class ComDefaultHelperPaginator extends KTemplateHelperPaginator
 		
 		$class = $pages['last']->active ? '' : 'off';
 		$html  .= '<div class="button2-left '.$class.'"><div class="end">'.$this->_link($pages['last'], 'Last').'</div></div>';
+
+		return $html;
+	}
+	
+	protected function _link($page, $title)
+	{
+		$url   = clone KRequest::url();
+		$query = $url->getQuery(true);
+
+		//For compatibility with Joomla use limitstart instead of offset
+		$query['limit']      = $page->limit;
+		$query['limitstart'] = $page->offset;
+
+		$class = $page->current ? 'class="active"' : '';
+
+		if($page->active && !$page->current) {
+			$html = '<a href="'.JRoute::_((string) $url->setQuery($query)).'" '.$class.'>'.JText::_($title).'</a>';
+		} else {
+			$html = '<span '.$class.'>'.JText::_($title).'</span>';
+		}
 
 		return $html;
 	}

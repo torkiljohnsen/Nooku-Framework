@@ -4,9 +4,9 @@
  * @category	Koowa
  * @package		Koowa_Factory
  * @subpackage	Chain
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
@@ -16,7 +16,7 @@
  * when a command return a value. If the command returns false the chain
  * will keep running.
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Factory
  */
@@ -31,7 +31,7 @@ class KFactoryChain extends KCommandChain
 	 * @param object  The command context
 	 * @return object|false  Return object on success, returns FALSE on failure
 	 */
-  	final public function run( $name, KCommandContext $context )
+  	final public function run( $identifier, KCommandContext $context )
   	{	
   		$iterator = $this->_priority->getIterator();
 
@@ -39,10 +39,10 @@ class KFactoryChain extends KCommandChain
 		{
     		$cmd = $this->_command[ $iterator->key()];
 
-			$result = $cmd->execute( $name, $context );
+			$result = $cmd->execute( $identifier, $context );
     		if ($result !== false) {
-    			return $result; //halt execution and return result
-      		}
+      			return $result;
+    		}
 
     		$iterator->next();
 		}

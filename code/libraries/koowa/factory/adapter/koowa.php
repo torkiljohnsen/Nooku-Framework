@@ -4,14 +4,14 @@
  * @category	Koowa
  * @package		Koowa_Factory
  * @subpackage 	Adapter
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
  * Factory Adapter for the Koowa framework
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Factory
  * @subpackage 	Adapter
@@ -28,7 +28,7 @@ class KFactoryAdapterKoowa extends KFactoryAdapterAbstract
 	 */
 	public function instantiate($identifier, KConfig $config)
 	{
-		$instance = false;
+		$classname = false;
 
 		if($identifier->type == 'lib' && $identifier->package == 'koowa')
 		{
@@ -44,23 +44,8 @@ class KFactoryAdapterKoowa extends KFactoryAdapterAbstract
 					throw new KFactoryAdapterException("Class [$classname] not found in file [".basename($filepath)."]" );
 				}
 			}
-
-			//If the object is indentifiable push the identifier in through the constructor
-			if(array_key_exists('KObjectIdentifiable', class_implements($classname))) 
-			{
-				$identifier->filepath  = $filepath;
-				$identifier->classname = $classname;
-				$config->identifier = $identifier;
-			}
-			
-			// If the class has an instantiate method call it
-			if(is_callable(array($classname, 'instantiate'), false)) {
-				$instance = call_user_func(array($classname, 'instantiate'), $config);
-			} else {
-				$instance = new $classname($config);
-			}
 		}
 
-		return $instance;
+		return $classname;
 	}
 }

@@ -1,22 +1,23 @@
 <?php
 /**
- * @version		$Id$
- * @category	Koowa
- * @package     Koowa_Dispatcher
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @version     $Id$
+ * @category	Nooku
+ * @package     Nooku_Components
+ * @subpackage  Default
+ * @copyright   Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link        http://www.nooku.org
  */
 
 /**
  * Default Dispatcher
 .*
- * @author		Johan Janssens <johan@koowa.org>
- * @category	Koowa
- * @package     Koowa_Components
+ * @author		Johan Janssens <johan@nooku.org>
+ * @category	Nooku
+ * @package     Nooku_Components
  * @subpackage  Default
  */
-class ComDefaultDispatcherDefault extends KDispatcherDefault
+class ComDefaultDispatcher extends KDispatcherDefault
 { 
 	/**
 	 * Dispatch the controller and redirect
@@ -31,16 +32,18 @@ class ComDefaultDispatcherDefault extends KDispatcherDefault
 	 *
 	 * @return	KDispatcherDefault
 	 */
-	protected function _actionDispatch($view)
+	protected function _actionDispatch(KCommandContext $context)
 	{
 		//Redirect if no view information can be found in the request
 		if(!KRequest::has('get.view')) 
 		{
+			$view = $context->data ? $context->data : $this->_controller_default;
+			
 			KFactory::get('lib.koowa.application')
 				->redirect('index.php?option=com_'.$this->_identifier->package.'&view='.$view);
 		}
 		
-		return parent::_actionDispatch($view);
+		return parent::_actionDispatch($context);
 	}
 	
 	/**

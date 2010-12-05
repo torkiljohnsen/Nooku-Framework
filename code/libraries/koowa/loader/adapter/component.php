@@ -4,14 +4,14 @@
  * @category	Koowa
  * @package		Koowa_Loader
  * @subpackage 	Adapter
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
  * Loader Adapter for a component
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Loader
  * @subpackage 	Adapter
@@ -62,12 +62,18 @@ class KLoaderAdapterComponent extends KLoaderAdapterAbstract
 			if (array_shift($parts) == 'com') 
 			{
 				$component = 'com_'.strtolower(array_shift($parts));
-			
-				if(count($parts) > 1) {
-					$path = KInflector::pluralize(array_shift($parts)).'/'.implode('/', $parts);
-				} else {
-					$path = $word;
-				}
+				$file 	   = array_pop($parts);
+				
+				if(count($parts)) 
+				{
+					foreach($parts as $key => $value) {
+						$parts[$key] = KInflector::pluralize($value);
+					}
+					
+					$path = implode('/', $parts);
+					$path = $path.'/'.$file;
+				} 
+				else $path = $file;
 			
 				$path = $this->_basepath.'/components/'.$component.'/'.$path.'.php';
 			}
@@ -119,8 +125,12 @@ class KLoaderAdapterComponent extends KLoaderAdapterAbstract
 	 */
 	protected function _setBasePath($identifier)
 	{
-		if(!$app = $identifier->application) {
+		if(!$app = $identifier->application) 
+		{
 			$app = KFactory::get('lib.koowa.application')->getName();
+			
+			//Add shortcuts
+			$app = ($app == 'administrator') ? 'admin' : $app;
 		}
 		
 		switch($app)

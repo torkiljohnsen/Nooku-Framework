@@ -3,15 +3,15 @@
  * @version		$Id$
  * @category	Koowa
  * @package		Koowa_Model
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
- * @link     	http://www.koowa.org
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link     	http://www.nooku.org
  */
 
 /**
  * State Model
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Model
  */
@@ -69,7 +69,7 @@ class KModelState extends KModelAbstract
      */
     public function __isset($name)
     {
-    	return array_key_exists($name, $this->_state);
+    	return isset($this->_state[$name]);
     }
 
     /**
@@ -183,7 +183,7 @@ class KModelState extends KModelAbstract
            		//Only return unique data 
             	if($unique) 
            		 {
-   					//Unique values cannot be empty
+   					//Unique values cannot be null or an empty string
            		 	if($state->unique && !empty($state->value)) 
            		 	{
            		 		$result = true;
@@ -191,7 +191,7 @@ class KModelState extends KModelAbstract
            		 		//Check related states to see if they are set
            		 		foreach($state->required as $required)
            		 		{
-           		 			if(!isset($this->_state[$required]->value)) 
+           		 			if(empty($this->_state[$required]->value)) 
            		 			{
            		 				$result = false;
            		 				break;

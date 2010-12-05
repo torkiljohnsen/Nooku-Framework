@@ -4,14 +4,14 @@
  * @category	Koowa
  * @package		Koowa_Factory
  * @subpackage 	Adapter
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
  * Factory Adapter for a plugin
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Factory
  * @subpackage 	Adapter
@@ -28,29 +28,27 @@ class KFactoryAdapterPlugin extends KFactoryAdapterAbstract
 	 */
 	public function instantiate($identifier, KConfig $config)
 	{
-		$instance = false;
+		$classname = false;
 		
 		if($identifier->type == 'plg') 
 		{			
 			$classpath = KInflector::camelize(implode('_', $identifier->path));
 			$classname = 'Plg'.ucfirst($identifier->package).$classpath.ucfirst($identifier->name);
 			
-      		//Don't allow the auto-loader to load plugin classes if they don't exists yet
-			if (!$path = KLoader::load( $classname )) {
-				throw new KFactoryAdapterException("Class [$classname] not found in file [".$path."]" );
-			}
-			
-			//If the object is indentifiable push the identifier in through the constructor
-			if(array_key_exists('KObjectIdentifiable', class_implements($classname))) 
+			//Don't allow the auto-loader to load plugin classes if they don't exists yet
+			if (!class_exists( $classname, false ))
 			{
-				$identifier->filepath  = $path;
-				$identifier->classname = $classname;
-				$config->identifier = $identifier;
+				//Find the file
+				if($path = KLoader::load($identifier))
+				{
+					//Don't allow the auto-loader to load plugin classes if they don't exists yet
+					if (!class_exists( $classname, false )) {
+						throw new KFactoryAdapterException("Class [$classname] not found in file [".$path."]" );
+					}
+				}
 			}
-							
-			$instance = new $classname($config);
 		}
 
-		return $instance;
+		return $classname;
 	}
 }

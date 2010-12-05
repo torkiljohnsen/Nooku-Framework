@@ -3,8 +3,8 @@
  * @version 	$Id$
  * @category	Koowa
  * @package		Koowa_Loader
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
@@ -31,7 +31,7 @@ require_once Koowa::getPath().'/loader/adapter/koowa.php';
 /**
  * KLoader class
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Loader
  * @static
@@ -170,7 +170,9 @@ class KLoader
 		} 
 		else 
 		{
-			$class = new KIdentifier($class);
+			if(!($class instanceof KIdentifier)) {
+				$class = new KIdentifier($class);
+			}
 			
 			$adapters = array_reverse(self::$_adapters);
 			foreach($adapters as $adapter)

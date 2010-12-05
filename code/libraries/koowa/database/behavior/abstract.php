@@ -4,14 +4,14 @@
  * @category	Koowa
  * @package		Koowa_Database
  * @subpackage 	Behavior
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens and Mathias Verraes. All rights reserved.
- * @license		GNU GPLv2 <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+ * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  */
 
 /**
  * Abstract Database Behavior
  *
- * @author		Johan Janssens <johan@koowa.org>
+ * @author		Johan Janssens <johan@nooku.org>
  * @category	Koowa
  * @package     Koowa_Database
  * @subpackage 	Behavior
@@ -56,7 +56,7 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
 	protected function _initialize(KConfig $config)
     {
     	$config->append(array(
-			'priority'   => KCommandChain::PRIORITY_NORMAL,
+			'priority'   => KCommand::PRIORITY_NORMAL,
 	  	));
 
     	parent::_initialize($config);
@@ -87,7 +87,7 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
 	 * Command handler
 	 * 
 	 * This function transmlated the command name to a command handler function of 
-	 * the format '_beforeTable[Command]' or '_afterTable[Command]. Command handler
+	 * the format '_beforeX[Command]' or '_afterX[Command]. Command handler
 	 * functions should be declared protected.
 	 * 
 	 * @param 	string  	The command name
@@ -96,9 +96,12 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
 	 */
 	final public function execute( $name, KCommandContext $context) 
 	{
-		$parts = explode('.', $name);	
-		$method = '_'.lcfirst(KInflector::implode($parts));
-		
+		$identifier = clone $context->caller->getIdentifier();
+		$type       = array_pop($identifier->path);
+	
+		$parts  = explode('.', $name);
+		$method = '_'.$parts[0].ucfirst($type).ucfirst($parts[1]);
+	
 		if(method_exists($this, $method)) {
 			return $this->$method($context);
 		}
@@ -118,9 +121,9 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
      */
     public function save()
     {
-   		KFactory::get($this->getTable())->getCommandChain()->disable();
+   		$this->getTable()->getCommandChain()->disable();
     	$this->_mixer->save();    
-    	KFactory::get($this->getTable())->getCommandChain()->enable();
+    	$this->getTable()->getCommandChain()->enable();
         
    		return $this->_mixer;
     }
@@ -136,9 +139,9 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
      */
     public function delete()
     {
-    	KFactory::get($this->getTable())->getCommandChain()->disable();
+    	$this->getTable()->getCommandChain()->disable();
     	$this->_mixer->delete();    
-    	KFactory::get($this->getTable())->getCommandChain()->enable();
+    	$this->getTable()->getCommandChain()->enable();
         
    		return $this->_mixer;
     }
@@ -148,7 +151,7 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
 	 * 
 	 * This function only returns a valid handle if one or more command handler 
 	 * functions are defined. A commend handler function needs to follow the 
-     * following format : '_afterTable[Event]' or '_beforeTable[Event]' to be 
+     * following format : '_afterX[Event]' or '_beforeX[Event]' to be 
      * recognised.
 	 * 
 	 * @return string A string that is unique, or NULL
@@ -156,7 +159,7 @@ abstract class KDatabaseBehaviorAbstract extends KMixinAbstract implements KData
 	 */
 	public function getHandle()
 	{
-		$methods = get_class_methods(get_class($this));
+		$methods = $this->getMethods();
 		
 		foreach($methods as $method) 
 		{
