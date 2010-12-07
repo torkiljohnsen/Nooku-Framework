@@ -30,7 +30,7 @@ class ComDefaultDispatcher extends KDispatcherDefault
     protected function _initialize(KConfig $config)
     {
     	$config->append(array(
-    		'request_persistent' => KRequest::type() == 'AJAX' ? false : true;
+    		'request_persistent' => KRequest::type() == 'AJAX' ? false : true
         ));
 
         parent::_initialize($config);
