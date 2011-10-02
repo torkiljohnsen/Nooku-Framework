@@ -64,24 +64,20 @@ class plgSystemKoowa extends JPlugin
 		
 		// Koowa : setup
         require_once( JPATH_LIBRARIES.'/koowa/koowa.php');
-        Koowa::getInstance();	
-		
-		 //Setup the loader
-        KLoader::addAdapter(new KLoaderAdapterModule(JPATH_BASE));
-        KLoader::addAdapter(new KLoaderAdapterPlugin(JPATH_ROOT));
-        KLoader::addAdapter(new KLoaderAdapterComponent(JPATH_BASE));
-		
-        // Koowa : setup factory
-        KIdentifier::addAdapter(new KIdentifierAdapterModule());
-        KIdentifier::addAdapter(new KIdentifierAdapterPlugin());
-        KIdentifier::addAdapter(new KIdentifierAdapterComponent());
-		
-        //Koowa : register identifier application paths
-        KIdentifier::setApplication('site' , JPATH_SITE);
-        KIdentifier::setApplication('admin', JPATH_ADMINISTRATOR);
+        Koowa::getInstance();		
 
-        //Koowa : setup factory mappings
-        KIdentifier::setAlias('koowa:database.adapter.mysqli', 'com://admin/default.database.adapter.mysqli');
+        KLoader::addAdapter(new KLoaderAdapterModule(array('basepath' => JPATH_BASE)));
+        KLoader::addAdapter(new KLoaderAdapterPlugin(array('basepath' => JPATH_ROOT)));
+        KLoader::addAdapter(new KLoaderAdapterComponent(array('basepath' => JPATH_BASE)));
+
+        KServiceIdentifier::addLocator(KService::get('koowa:service.locator.module'));
+        KServiceIdentifier::addLocator(KService::get('koowa:service.locator.plugin'));
+        KServiceIdentifier::addLocator(KService::get('koowa:service.locator.component'));
+		
+        KServiceIdentifier::setApplication('site' , JPATH_SITE);
+        KServiceIdentifier::setApplication('admin', JPATH_ADMINISTRATOR);
+
+        KService::setAlias('koowa:database.adapter.mysqli', 'com://admin/default.database.adapter.mysqli');
 		
 	    //Setup the request
         KRequest::root(str_replace('/'.JFactory::getApplication()->getName(), '', KRequest::base()));
