@@ -120,9 +120,7 @@ class plgSystemKoowa extends JPlugin
 	     * In case another plugin have logged in after we initialized we need to reset the token and user object
 	     * One plugin that could cause that, are the Remember Me plugin
 	     */
-	     if(KFactory::get('joomla:user')->get('guest') && !JFactory::getUser()->guest)
-	     { 
-	         //Force the token
+	     if(!JFactory::getUser()->guest) {
 	         KRequest::set('request._token', JUtility::getToken());
 	     }
 	}
