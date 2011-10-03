@@ -83,7 +83,7 @@ class plgSystemKoowa extends JPlugin
         KRequest::root(str_replace('/'.JFactory::getApplication()->getName(), '', KRequest::base()));
 			 
 		//Load the koowa plugins
-		JPluginHelper::importPlugin('koowa', null, true, KFactory::get('com://admin/default.event.dispatcher'));
+		JPluginHelper::importPlugin('koowa', null, true, KService::get('com://admin/default.event.dispatcher'));
 		
 	    //Bugfix : Set offset accoording to user's timezone
 		if(!JFactory::getUser()->guest) 
