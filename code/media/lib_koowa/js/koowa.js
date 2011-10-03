@@ -182,6 +182,7 @@ Koowa.Controller = new Class({
 
     options: {
         toolbar: false,
+        ajaxify: false,
         url: window.location.href
     },
     
@@ -190,7 +191,8 @@ Koowa.Controller = new Class({
         this.setOptions(options);
         
         this.form = this.options.form;
-        this.toolbar = this.options.toolbar || this.form;
+        this.toolbar = this.options.toolbar;
+        if(this.form.action) this.options.url = this.form.action;
 
         //Set options that is coming from data attributes on the form element
         this.setOptions(this.getOptions(this.form));
@@ -201,6 +203,7 @@ Koowa.Controller = new Class({
         this.form.addEvent('execute', this.execute.bind(this));
         
         //Attach toolbar buttons actions
+        if(this.toolbar) {
         this.buttons = this.toolbar.getElements('.toolbar').filter(function(button){
             return button.get('data-action');
         });
@@ -222,6 +225,7 @@ Koowa.Controller = new Class({
             }.bind(this));
             
         }, this);
+        }
     },
     
     execute: function(action, data, novalidate){
@@ -258,6 +262,7 @@ Koowa.Controller = new Class({
     },
     
     checkValidity: function(){
+        if(this.buttons) {
         var buttons = this.buttons.filter(function(button){
             return button.get('data-novalidate') !== 'novalidate';
         }, this);
@@ -267,6 +272,7 @@ Koowa.Controller = new Class({
             buttons.removeClass('disabled');
         } else {
             buttons.addClass('disabled');
+        }
         }
     },
     
@@ -311,7 +317,7 @@ Koowa.Controller.Grid = new Class({
         this.addEvent('validate', this.validate);
         
         //Perform grid validation and set the right classes on toolbar buttons
-        if(this.options.inputs) {
+        if(this.options.inputs && this.buttons) {
             //This is to allow CSS3 transitions without those animating onload without user interaction
             this.buttons.addClass('beforeload');
             this.checkValidity();
@@ -321,7 +327,16 @@ Koowa.Controller.Grid = new Class({
         }
         
         //<select> elements in headers and footers are for filters, so they need to submit the form on change
-        this.form.getElements('thead select, tfoot select').addEvent('change', this.form.submit.bind(this.form));
+        var selects = this.form.getElements('thead select, tfoot select');
+        if(this.options.ajaxify) {
+            selects.addEvent('change', function(event){
+                event.stop();
+                this.options.transport(this.form.action, this.form.toQueryString(), 'get');
+            }.bind(this));
+        } else {
+            selects.addEvent('change', this.form.submit.bind(this.form));
+        }
+        
         
         //Pick up actions that are in the grid itself
         var token_name = this.form.get('data-token-name'),
@@ -468,18 +483,26 @@ Koowa.Overlay = new Class({
     element : null,
     
     options: {
+        selector: 'body',
+        ajaxify: true,
         method: 'get',
         evalScripts: true,
         evalStyles: true,
         
         onComplete: function() {
-            var element = new Element('div', {html: this.response.text}), scripts, styles;
-            element.getElement('[id='+this.element.id+']').replaces(this.element);
+            var element = new Element('div', {html: this.response.text}), 
+                body = element.getElement(this.options.selector) || element,
+                self = this,
+                scripts, 
+                styles;
+
+            this.element.empty().grab(body);
+            
             if (this.options.evalScripts) {
                 scripts = element.getElementsBySelector('script[type=text/javascript]');
                 scripts.each(function(script) {
+                    if(document.getElement('script[src$='+script.src.replace(location.origin, '')+']')) return;
                     new Asset.javascript(script.src, {id: script.id });
-                    script.remove();
                 }.bind(this));
             }
 
@@ -487,9 +510,42 @@ Koowa.Overlay = new Class({
                 styles = element.getElementsBySelector('link[type=text/css]');
                 styles.each(function(style) {
                     new Asset.css(style.href, {id: style.id });
-                    style.remove();
                 }.bind(this));
             }
+
+            if (this.options.ajaxify) {
+                this.element.getElements('a[href]').each(function(link){
+                    //Avoid links with data-noasync attributes
+                    if(link.getAttribute('data-noasync') !== null) return;
+                    link.addEvent('click', function(event){
+                        event.stop();
+                        self.get(this.href, {tmpl:''});
+                    });
+                });
+                
+                /* @TODO
+                this.element.getElements('.submitable').addEvent('click', function(event){
+                    event = new Event(event);
+                    new Koowa.Form(Json.decode(event.target.getProperty('rel'))).submit();
+                });
+                */
+
+                this.element.getElements('.-koowa-grid').each(function(grid){
+                    new Koowa.Grid(grid);
+                    
+                    new Koowa.Controller.Grid({form: grid, ajaxify: true, transport: function(url, data, method){
+                        data += '&tmpl=';
+                        this.send({url: url, data: data, method: method});
+                    }.bind(this)});
+                }, this);
+            
+                this.element.getElements('.-koowa-form').each(function(form){
+                    new Koowa.Controller.Form({form: form, ajaxify: true, transport: function(url, data, method){
+                        data += '&tmpl=';
+                        this.send({url: url, data: data, method: method});
+                    }.bind(this)});
+                }, this);
+        }
         }
     },
     
@@ -499,7 +555,8 @@ Koowa.Overlay = new Class({
         }
         
         this.element = document.id(element); 
-        this.options.url = element.getAttribute('href'); 
+
+        this.options.url = this.element.getAttribute('data-url'); 
         this.parent(options);
         
         this.send();

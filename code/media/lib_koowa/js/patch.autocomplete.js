@@ -38,7 +38,6 @@ license: @TODO
     
         Form.Validator.add('ma-required', {
         	errorMsg: function(){
-        	    console.log(arguments, this);
         	    return Form.Validator.getMsg('required');
         	},
         	test: function(element){
