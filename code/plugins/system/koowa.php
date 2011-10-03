@@ -200,7 +200,7 @@ class plgSystemKoowa extends JPlugin
 	    if(JFactory::getConfig()->getValue('config.debug')) {
 			$error->set('message', (string) $this->_exception);
 		} else {
-			$error->set('message', KHttpResponse::getMessage($error->code));
+			$error->set('message', KHttpResponse::getMessage($error->get('code')));
 		}
 		
 	    if($this->_exception->getCode() == KHttpResponse::UNAUTHORIZED) {
