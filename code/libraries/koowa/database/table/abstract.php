@@ -520,7 +520,7 @@ abstract class KDatabaseTableAbstract extends KObject
     public function select( $query = null, $mode = KDatabase::FETCH_ROWSET)
     {
        //Create query object
-        if(is_string($query) || (is_array($query) && is_numeric(key($query))))
+        if(is_numeric($query) || is_string($query) || (is_array($query) && is_numeric(key($query))))
         {
             $key    = $this->getIdentityColumn();
             $values = (array) $query;
