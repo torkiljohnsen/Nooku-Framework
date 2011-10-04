@@ -185,7 +185,7 @@ class KControllerBehaviorEditable extends KControllerBehaviorAbstract
 		}
 		else
 		{ 
-		    if ($data instanceof KDatabaseRowAsbtract) { 
+		    if ($data instanceof KDatabaseRowAbstract) { 
                 $url->query[$data->getIdentityColumn()] = $data->get($data->getIdentityColumn()); 
             } else { 
                 $url = $this->getReferrer();
