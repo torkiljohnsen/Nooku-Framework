@@ -137,9 +137,9 @@ abstract class KModelAbstract extends KObject
         
         if($changed)
         {
-            unset($this->_list);
-            unset($this->_item);
-            unset($this->_total);
+            $this->_list  = null;
+            $this->_item  = null;
+            $this->_total = null;
         }
 
         return $this;
@@ -186,9 +186,9 @@ abstract class KModelAbstract extends KObject
      */
     public function reset($default = true)
     {
-        unset($this->_list);
-        unset($this->_item);
-        unset($this->_total);
+        $this->_list  = null;
+        $this->_item  = null;
+        $this->_total = null;
         
         $this->_state->reset($default);
 
