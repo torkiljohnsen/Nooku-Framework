@@ -24,7 +24,7 @@ Koowa.version = 0.7;
 window.addEvent('domready', function() {
     $$('.submitable').addEvent('click', function(event){
         event = new Event(event);
-        new Koowa.Form(Json.decode(event.target.getProperty('rel'))).submit();
+        new Koowa.Form(JSON.decode(event.target.getProperty('rel'))).submit();
     });
 
     $$('.-koowa-grid').each(function(grid){
@@ -526,7 +526,7 @@ Koowa.Overlay = new Class({
                 /* @TODO
                 this.element.getElements('.submitable').addEvent('click', function(event){
                     event = new Event(event);
-                    new Koowa.Form(Json.decode(event.target.getProperty('rel'))).submit();
+                    new Koowa.Form(JSON.decode(event.target.getProperty('rel'))).submit();
                 });
                 */
 
@@ -551,7 +551,7 @@ Koowa.Overlay = new Class({
     
     initialize: function(element, options) {
         if(typeof options === 'string') {
-            options = Json.evaluate(options);
+            options = JSON.evaluate(options);
         }
         
         this.element = document.id(element); 
