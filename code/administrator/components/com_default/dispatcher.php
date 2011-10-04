@@ -81,7 +81,7 @@ class ComDefaultDispatcher extends KDispatcherDefault implements KServiceInstant
         {
             $package = $this->getIdentifier()->package;
             $view    = $this->getController()->getView()->getName();
-            $route = JRoute::_('index.php?option=com_'.$package.'&view='.$view, true);
+            $route = JRoute::_('index.php?option=com_'.$package.'&view='.$view, false);
             
             JFactory::getApplication()->redirect($route);
         }
