@@ -284,7 +284,7 @@ Koowa.Controller = new Class({
             }
         } else {
             total = element.attributes.length;
-            for (i = 0; i < total; i++){
+            for (var i = 0; i < total; i++){
                 key = element.attributes[i].name;
                 if(key.substring && key.substring(0, 5) === 'data-') {
                     name = key.substring(5, key.length).camelCase();
