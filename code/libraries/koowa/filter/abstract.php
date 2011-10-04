@@ -39,7 +39,7 @@ abstract class KFilterAbstract extends KObject implements KFilterInterface
 	 */
 	public function __construct(KConfig $config) 
 	{
-		parent::construct($config); 
+		parent::__construct($config); 
 		 
 	    $this->_chain = new KFilterChain();
 		$this->addFilter($this);
