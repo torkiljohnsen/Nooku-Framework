@@ -253,6 +253,29 @@ abstract class KModelAbstract extends KObject
 
         return $data;
     }
+    
+	/**
+     * Get a model state by name
+     *
+     * @param   string  The key name.
+     * @return  string  The corresponding value.
+     */
+    public function __get($key)
+    {
+        return $this->get($key);
+    }
+
+    /**
+     * Set a model state by name
+     *
+     * @param   string  The key name.
+     * @param   mixed   The value for the key
+     * @return  void
+     */
+    public function __set($key, $value)
+    {
+        $this->set($key, $value);
+    }
       
     /**
      * Supports a simple form Fluent Interfaces. Allows you to set states by
