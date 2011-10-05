@@ -86,18 +86,33 @@ class KViewJson extends KViewAbstract
 
             if(KInflector::isPlural($this->getName())) 
             {
-                if($list = $model->getList())  {   
-                    $data = array_values($list->toArray());
+                if($list = $model->getList())  
+                {   
+                    $items = array_values($list->toArray());
+                    $url   = clone KRequest::url();
+                    $state = $model->getState();
+                     
+                    $this->output = array(
+                    	'version'  => '1.0',
+                        'href'     => (string) $url->setQuery($state->toArray()),
+                        'url'      => array(
+                            'type'     => 'application/json',
+                            'template' => (string) $url->get(KHttpUrl::BASE).'?{&'.implode(',', array_keys($state->toArray())).'}',
+                         ),              
+                		'total'    => $model->getTotal(),
+                    	'pages'    => (int) ceil($model->getTotal() / $model->limit),
+                        'offset'   => $model->offset,
+                		'limit'    => $model->limit,
+                		'items'    => $items
+                     );    
                 }    
             } 
             else 
             {
                 if($item = $model->getItem()) {
-                    $data = $item->toArray();
+                    $this->output = $item->toArray();
                 }
             }
-
-            $this->output = $data;
         }
 
         if (!is_string($this->output)) {
