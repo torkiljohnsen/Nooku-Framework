@@ -28,9 +28,9 @@ class KControllerBehaviorEditable extends KControllerBehaviorAbstract
     { 
         parent::__construct($config);
 
-        if (strpos(KRequest::protocol(), 'http') === false) 
+        if (strpos(KRequest::protocol(), 'http') !== false) 
         {
-	        $this->registerCallback('before.read' , array($this, 'setReferrer'));
+            $this->registerCallback('before.read' , array($this, 'setReferrer'));
 	        $this->registerCallback('after.save'  , array($this, 'unsetReferrer'));
 			$this->registerCallback('after.cancel', array($this, 'unsetReferrer'));	
         }
