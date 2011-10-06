@@ -209,7 +209,7 @@ class KRequest
         }
         
         // Store cookies persistently
-        if($hash == 'COOKIE')
+        if($hash == 'COOKIE' && strpos(KRequest::protocol(), 'http') !== false)
         {
             // rewrite the $keys as foo[bar][bar]
             $ckeys = $keys; // get a copy
