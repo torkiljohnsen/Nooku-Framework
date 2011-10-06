@@ -495,7 +495,7 @@ class KRequest
         
         if (PHP_SAPI !== 'cli') 
         {
-            $protocal = 'http';
+            $protocol = 'http';
             
             if (isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) != 'off')) {
                 $protocol = 'https';
