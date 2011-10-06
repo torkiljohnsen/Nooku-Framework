@@ -64,7 +64,10 @@ class plgSystemKoowa extends JPlugin
 		
 		// Koowa : setup
         require_once( JPATH_LIBRARIES.'/koowa/koowa.php');
-        Koowa::getInstance();		
+        Koowa::getInstance(array(
+			'cache_prefix'  => md5(JFactory::getApplication()->getCfg('secret')).'-cache-koowa',
+			'cache_enabled' => JFactory::getApplication()->getCfg('caching')
+        ));	
 
         KLoader::addAdapter(new KLoaderAdapterModule(array('basepath' => JPATH_BASE)));
         KLoader::addAdapter(new KLoaderAdapterPlugin(array('basepath' => JPATH_ROOT)));
