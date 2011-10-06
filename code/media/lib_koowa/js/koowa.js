@@ -326,6 +326,50 @@ Koowa.Controller.Grid = new Class({
             this.form.getElements(this.options.inputs).addEvent('change', this.checkValidity.bind(this));
         }
         
+        //Make the table headers "clickable"
+		var thead = this.form.getElements('thead').filter(function(thead){
+			return thead.getSiblings().length;
+		}).each(function(thead){
+			var elements = thead.getElements('tr > *').each(function(element){
+				
+				var link = element.getElement('a');
+				if(link) {
+					element.addEvent('click', function(event){
+						//Don't do anything if the event target is the same as the element
+						if(event.target != element) return;
+					
+						//Run this check on click, so that progressive enhancements isn't bulldozed
+						if(link.get('href')) {
+							window.location.href = link.get('href');
+						} else {
+							link.fireEvent('click', event);
+						}
+					});
+					element.adopt(new Element('span', {'class':'-koowa-grid-arrow'}));
+					if(link.hasClass('-koowa-asc'))  element.addClass('-koowa-asc');
+					if(link.hasClass('-koowa-desc')) element.addClass('-koowa-desc');
+					
+					return;
+				}
+
+				//Making the <td> or <th> element that's the parent of a checkall checkbox toggle the checkbox when clicked
+				var checkall = element.getElement('.-koowa-grid-checkall');
+				if(checkall) {
+					element.addEvent('click', function(event){
+						//Don't do anything if the event target is the same as the element
+						if(event.target != element) return;
+
+						//Checkall uses change for other purposes
+						checkall.set('checked', checkall.match('[checked]') ? false : true).fireEvent('change', event);
+					});
+
+					return;
+				}
+				
+				element.addClass('void');
+			});
+		});
+        
         //<select> elements in headers and footers are for filters, so they need to submit the form on change
         var selects = this.form.getElements('thead select, tfoot select');
         if(this.options.ajaxify) {
@@ -353,6 +397,44 @@ Koowa.Controller.Grid = new Class({
             if(!checkbox) {
                 return;
             }
+
+            tr.addEvents({
+                click: function(event){
+                	if(event.target.hasClass('toggle-state') || event.target.match('[type=checkbox]')) return;
+                	var checkbox = this.getElement('input[type=checkbox]'), checked = checkbox.getProperty('checked');
+                	if(checked) {
+                		this.removeClass('selected');
+                		checkbox.setProperty('checked', false);
+                	} else {
+                		this.addClass('selected');
+                		checkbox.setProperty('checked', true);
+                	}
+                	checkbox.fireEvent('change', event);
+                },
+            	dblclick: function(event){
+            	    if(event.target.match('a') || event.target.match('td') || event.target == this) {
+            		    window.location.href = this.getElement('a').get('href');
+            	    }
+            	},
+            	contextmenu: function(event){
+            		var modal = this.getElement('a.modal');
+            		if(modal) {
+            			event.preventDefault();	
+            			modal.fireEvent('click');
+            		}
+            	}
+            });
+            
+            checkbox.addEvent('change', function(tr){
+            	this.getProperty('checked') ? tr.addClass('selected') : tr.removeClass('selected');
+            	var selected = tr.hasClass('selected') + tr.getSiblings('.selected').length, parent = tr.getParent();
+            	if(selected > 1) {
+            		parent.addClass('selected-multiple').removeClass('selected-single')
+            	} else {
+            		parent.removeClass('selected-multiple').addClass('selected-single');
+            	}
+            }.pass(tr, checkbox)).fireEvent('change');
+
 
             id = {name: checkbox.get('name'), value: checkbox.get('value')};
             //Attributes with hyphens don't work with the MT 1.2 selector engine, it's fixed in 1.3 so this is a workaround
