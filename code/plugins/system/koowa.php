@@ -23,7 +23,19 @@ class plgSystemKoowa extends JPlugin
 {
 	public function __construct($subject, $config = array())
 	{
-		// Check if Koowa is active
+	    // Command line fixes for Joomla
+		if (PHP_SAPI === 'cli') 
+		{
+			if (!isset($_SERVER['HTTP_HOST'])) {
+				$_SERVER['HTTP_HOST'] = '';
+			}
+			
+			if (!isset($_SERVER['REQUEST_METHOD'])) {
+				$_SERVER['REQUEST_METHOD'] = '';
+			}
+		}
+	    
+	    // Check if Koowa is active
 		if(JFactory::getApplication()->getCfg('dbtype') != 'mysqli')
 		{
     		JError::raiseWarning(0, JText::_("Koowa plugin requires MySQLi Database Driver. Please change your database configuration settings to 'mysqli'"));
@@ -125,6 +137,24 @@ class plgSystemKoowa extends JPlugin
 	     */
 	     if(!JFactory::getUser()->guest) {
 	         KRequest::set('request._token', JUtility::getToken());
+	     }
+	     
+	    /*
+	     * Dispatch the default dispatcher 
+	     *
+	     * If we are running in CLI mode bypass the default Joomla executition chain and dispatch the default
+	     * dispatcher.
+	     */
+	     if (PHP_SAPI === 'cli') 
+	     {
+	         $options = getopt('a::u::p::h::', array('url::', 'help::'));
+	    	
+	         if (!empty($options['url']) || !empty($options['help']) || !empty($options['h'])) 
+	         {
+	             // Thanks Joomla. We will take it from here.
+	             echo KService::get('com:default.dispatcher.cli')->dispatch();
+	             exit(0);	
+	         }
 	     }
 	}
 	
