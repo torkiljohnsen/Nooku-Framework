@@ -191,7 +191,7 @@ class KDatabaseRowTable extends KDatabaseRowAbstract
 	        {
 	            // Filter out any extra columns.
 	            if(((integer) $result) > 0) {       
-                    $this->_modified = array_intersect_key($this->_modified, $this->getTable()->getColumns(true));
+                    $this->_modified = array();
 	            } 
             }
 	    }
