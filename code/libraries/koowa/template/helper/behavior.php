@@ -309,7 +309,7 @@ class KTemplateHelperBehavior extends KTemplateHelperAbstract
 		$html .= "
 		<script>
 			window.addEvent('domready', function(){				
-				new Meio.Autocomplete.Select($('".$config->element."'), ".json_encode($config->url).", ".$config->options.");
+				new Koowa.Autocomplete($('".$config->element."'), ".json_encode($config->url).", ".$config->options.");
 			});
 		</script>";
 
