@@ -414,8 +414,8 @@ class KRequest
                         $url .= '?' . $_SERVER['QUERY_STRING'];
                     }
                 }
-        		
         	}
+        	else $url .= 'koowa';
             
             // Sanitize the url since we can't trust the server var
             $url = KService::get('koowa:filter.url')->sanitize($url);
