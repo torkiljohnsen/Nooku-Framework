@@ -241,6 +241,7 @@ class KTemplateHelperBehavior extends KTemplateHelperAbstract
 		    } else {
 		        $html .= '<script src="media://lib_koowa/js/validator-1.2.js" />';
 		    }
+		    $html .= '<script src="media://lib_koowa/js/patch.validator.js" />';
 
             self::$_loaded['validator'] = true;
         }
@@ -250,7 +251,7 @@ class KTemplateHelperBehavior extends KTemplateHelperAbstract
 		$html .= "<script>
 		window.addEvent('domready', function(){
 		    $$('$config->selector').each(function(form){
-		        new Form.Validator.Inline(form".$options.");
+		        new Koowa.Validator(form".$options.");
 		        form.addEvent('validate', form.validate.bind(form));
 		    });
 		});
