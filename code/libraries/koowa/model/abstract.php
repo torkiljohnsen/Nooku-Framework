@@ -305,6 +305,8 @@ abstract class KModelAbstract extends KObject
      */
     public function __clone()
     {
+        parent::__clone();
+        
         $this->_state = clone $this->_state;
     }
 }
