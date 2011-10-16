@@ -39,7 +39,7 @@ class KFilterAlnum extends KFilterAbstract
 	protected function _sanitize($value)
 	{
 		$value = trim($value);
-	    
+		
 	    $pattern 	= '/[^\w]*/';
     	return preg_replace($pattern, '', $value);
 	}
