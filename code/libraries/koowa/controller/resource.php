@@ -129,7 +129,11 @@ abstract class KControllerResource extends KControllerAbstract
 			}
 			
 			//Create the view
-			$config = array('model' => $this->getModel());
+			$config = array(
+				'model'     => $this->getModel(),
+			    'media_url' => KRequest::root().'/media' 
+			);
+			
 			if($this->isExecutable()) {
 			    $config['auto_assign'] = !$this->getBehavior('executable')->isReadOnly();
 			}
