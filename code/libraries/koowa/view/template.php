@@ -89,17 +89,11 @@ abstract class KViewTemplate extends KViewAbstract
         }
          
         // Set base and media urls for use by the view
-        $this->assign('baseurl' , $config->base_url)
-             ->assign('mediaurl', $config->media_url);
+        $this->assign('mediaurl', $config->media_url);
         
         //Add alias filter for media:// namespace
         $this->getTemplate()->getFilter('alias')->append(
             array('media://' => $config->media_url.'/'), KTemplateFilter::MODE_READ | KTemplateFilter::MODE_WRITE
-        );
-        
-        //Add alias filter for base:// namespace
-        $this->getTemplate()->getFilter('alias')->append(
-            array('base://' => $config->base_url.'/'), KTemplateFilter::MODE_READ | KTemplateFilter::MODE_WRITE
         );
     }
 
@@ -122,8 +116,7 @@ abstract class KViewTemplate extends KViewAbstract
             'template'         => $this->getName(),
             'template_filters' => array('shorttag', 'alias', 'variable', 'script', 'style', 'link', 'template'),
             'auto_assign'      => true,
-            'base_url'         => KRequest::base(),
-            'media_url'        => KRequest::root().'/media',
+            'media_url'        => '/media',
         ));
         
         parent::_initialize($config);
