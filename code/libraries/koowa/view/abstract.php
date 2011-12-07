@@ -244,12 +244,12 @@ abstract class KViewAbstract extends KObject
 			}
 		}
 			
-		//Add the format information to the URL only if it's not 'html'
+		//Add the format information to the route only if it's not 'html'
 		if(!isset($parts['format']) && $this->getIdentifier()->name != 'html') {
 			$parts['format'] = $this->getIdentifier()->name;
 		}
 		
-		 //Add the model state only for links to the same view
+		 //Add the model state only for routes to the same view
 		if($parts['view'] == $this->getName())
 		{
 		    $state = $this->getModel()->getState()->toArray();
