@@ -210,7 +210,6 @@ abstract class KViewAbstract extends KObject
 	 *
 	 * - foo=bar
 	 * - option=com_mycomp&view=myview&foo=bar
-	 * - index.php?option=com_mycomp&view=myview&foo=bar
 	 *
 	 * In templates, use @route()
 	 *
@@ -220,11 +219,6 @@ abstract class KViewAbstract extends KObject
 	public function getRoute( $route = '')
 	{
 		$route = trim($route);
-
-		//Strip 'index.php?'
-		if(substr($route, 0, 10) == 'index.php?') {
-			$route = substr($route, 10);
-		}
 
 		//Parse route
 		$parts = array();
