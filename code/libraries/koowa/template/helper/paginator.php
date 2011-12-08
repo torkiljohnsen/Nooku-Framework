@@ -134,14 +134,16 @@ class KTemplateHelperPaginator extends KTemplateHelperSelect
 		    'active'  => false,
 			'offset'  => 0,
 			'limit'	  => 0,
+		    'rel'	  => '',
 			'attribs'  => array(),
 		));
 		
         $route = $this->getTemplate()->getView()->getRoute('limit='.$config->limit.'&offset='.$config->offset);
         $class = $config->current ? 'class="active"' : '';
+        $rel   = !empty($config->rel) ? 'rel="'.$config->rel.'"' : ''; 
 
         if($config->active && !$config->current) {
-            $html = '<a href="'.$route.'" '.$class.'>'.JText::_($config->title).'</a>';
+            $html = '<a href="'.$route.'" '.$class.' '.$rel.'>'.JText::_($config->title).'</a>';
         } else {
             $html = '<span '.$class.'>'.JText::_($config->title).'</span>';
         }
