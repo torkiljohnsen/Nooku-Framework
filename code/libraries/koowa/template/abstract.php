@@ -213,7 +213,7 @@ abstract class KTemplateAbstract extends KObject
 		    {
 			    $identifier			= clone $this->getIdentifier();
 			    $identifier->path	= array('view', $view);
-			    $identifier->name	= KRequest::format() ? KRequest::format() : 'html';
+			    $identifier->name	= 'html';
 			}
 			else $identifier = $this->getIdentifier($view);
 		    
