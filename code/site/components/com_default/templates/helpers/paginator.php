@@ -16,25 +16,22 @@
  * @category    Nooku
  * @package     Nooku_Components
  * @subpackage  Default
- * @uses        KRequest
- * @uses        KConfig
  */
 class ComDefaultTemplateHelperPaginator extends KTemplateHelperPaginator
 {
-    /**
-     * Render item pagination
-     * 
-     * @param   array   An optional array with configuration options
-     * @return  string  Html
-     * @see     http://developer.yahoo.com/ypatterns/navigation/pagination/
-     */
-    public function pagination($config = array())
-    { 
-        $config = new KConfigPaginator($config);
-        $config->append(array(
+	/**
+	 * Render a select box with limit values
+	 *
+	 * @param 	array 	An optional array with configuration options
+	 * @return 	string	Html select box
+	 */
+	public function limit($config = array())
+	{
+		$config = new KConfig($config);
+		$config->append(array(
             'attribs'   => array('onchange' => 'this.form.submit();'),
         ));
-         
-        return parent::pagination($config);
-    }
+		
+		return parent::limit($config);
+	}
 }
