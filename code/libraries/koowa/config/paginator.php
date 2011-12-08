@@ -84,12 +84,12 @@ class KConfigPaginator extends KConfig
         $offset  = 0;
         $active  = $offset != $this->offset;
         
-        $pages->first = array('title' => 'First', 'page' => 1, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active );
+        $pages->first = array('title' => 'First', 'page' => 1, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active, 'rel' => 'first' );
       
         // Previous
         $offset  = max(0, ($this->current - 2) * $this->limit);
         $active  = $offset != $this->offset;
-        $pages->prev = array('title' => 'Prev', 'page' => $this->current - 1, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active);
+        $pages->prev = array('title' => 'Prev', 'page' => $this->current - 1, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active, 'rel' => 'prev');
 
         // Pages
         $offsets = array();
@@ -104,12 +104,12 @@ class KConfigPaginator extends KConfig
         // Next
         $offset = min(($this->count-1) * $this->limit, ($this->current) * $this->limit);
         $active = $offset != $this->offset;
-        $pages->next = array('title' => 'Next', 'page' => $this->current + 1, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active);
+        $pages->next = array('title' => 'Next', 'page' => $this->current + 1, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active, 'rel' => 'next');
        
         // Last
         $offset  = ($this->count - 1) * $this->limit;
         $active  = $offset != $this->offset;
-        $pages->last = array('title' => 'Last', 'page' => $this->count, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active);
+        $pages->last = array('title' => 'Last', 'page' => $this->count, 'offset' => $offset, 'limit' => $this->limit, 'current' => false, 'active' => $active, 'rel' => 'last');
         
         return $pages;
     }
