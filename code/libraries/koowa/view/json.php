@@ -175,7 +175,7 @@ class KViewJson extends KViewAbstract
                 if($page->active) 
                 {  
                     $queries[] = array(
-		   				'rel' => $offset, 
+		   				'rel' => $page->rel, 
 		   				'href' => (string) $this->getRoute('limit='.$page->limit.'&offset='.$page->offset)
                     );
                 }
