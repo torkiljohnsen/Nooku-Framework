@@ -238,15 +238,16 @@ abstract class KViewAbstract extends KObject
 		}
 
 		//Add the view information to the route if it's not set
-		if(!isset($parts['view'])) {
+		if(!isset($parts['view'])) 
+		{
 			$parts['view'] = $this->getName();
+			
+		    //Add the layout information to the route if it's not set
+	        if(!isset($parts['layout'])) {
+			    $result[] = 'layout='.$this->getLayout();
+		    }
 		}
 		
-		//Add the layout information to the route if it's not set
-	    if(!isset($parts['layout'])) {
-		    $parts['layout'] = $this->getLayout();
-		}
-			
 		//Add the format information to the route only if it's not 'html'
 		if(!isset($parts['format'])) {
 			$parts['format'] = $this->getIdentifier()->name;
