@@ -77,7 +77,7 @@ class ComDefaultDispatcher extends KDispatcherDefault implements KServiceInstant
     protected function _actionDispatch(KCommandContext $context)
     {
         //Redirect if no view information can be found in the request
-        if($this->getRequest()->view) 
+        if(!$this->getRequest()->view) 
         {
             $package = $this->getIdentifier()->package;
             $view    = $this->getController()->getView()->getName();
