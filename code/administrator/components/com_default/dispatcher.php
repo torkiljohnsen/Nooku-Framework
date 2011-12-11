@@ -79,10 +79,7 @@ class ComDefaultDispatcher extends KDispatcherDefault implements KServiceInstant
         //Redirect if no view information can be found in the request
         if(!$this->getRequest()->view) 
         {
-            $package = $this->getIdentifier()->package;
-            $view    = $this->getController()->getView()->getName();
-            $route = JRoute::_('index.php?option=com_'.$package.'&view='.$view, false);
-            
+            $route    = $this->getController()->getView()->getRoute();   
             JFactory::getApplication()->redirect($route);
         }
        
