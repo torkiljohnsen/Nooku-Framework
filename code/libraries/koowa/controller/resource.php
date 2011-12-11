@@ -92,20 +92,16 @@ abstract class KControllerResource extends KControllerAbstract
      */
     protected function _initialize(KConfig $config)
     {
-    	$config->append(array(
+        $config->append(array(
     	    'model'	     => $this->getIdentifier()->name,
-        	'view'	     => $this->getIdentifier()->name,
     	    'behaviors'  => array('executable'),
     	    'readonly'   => true, 
     		'request' 	 => array('format' => 'html'),
+        ))->append(array(
+            'view' 		=> $config->request->view ? $config->request->view : $this->getIdentifier()->name
         ));
         
         parent::_initialize($config);
-        
-        //Force the view to the information found in the request
-        if(isset($config->request->view)) {
-            $config->view = $config->request->view;
-        }
     }
     
 	/**
