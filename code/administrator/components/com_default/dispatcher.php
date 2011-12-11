@@ -10,7 +10,7 @@
  */
 
 /**
- * Default Dispatcher
+ * Default Dispatcher Class
 .*
  * @author      Johan Janssens <johan@nooku.org>
  * @category    Nooku
