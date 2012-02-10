@@ -4,7 +4,7 @@
  * @category	Koowa
  * @package		Koowa_Template
  * @subpackage	Helper
- * @copyright	Copyright (C) 2007 - 2010 Johan Janssens. All rights reserved.
+ * @copyright	Copyright (C) 2007 - 2012 Johan Janssens. All rights reserved.
  * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
  * @link     	http://www.nooku.org
  */
@@ -384,7 +384,7 @@ class KTemplateHelperBehavior extends KTemplateHelperAbstract
 		$attribs = KHelperArray::toString($config->attribs);
 
    		$html .= '<input type="text" name="'.$config->name.'" id="'.$config->name.'" value="'.$config->date.'" '.$attribs.' />';
-		$html .= '<img class="calendar" src="media://system/images/calendar.png" alt="calendar" id="button-'.$config->name.'" />';
+		$html .= '<img class="calendar" src="media://lib_koowa/images/calendar.png" alt="calendar" id="button-'.$config->name.'" />';
 		
 		return $html;
 	}
